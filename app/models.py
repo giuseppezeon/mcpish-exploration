@@ -46,6 +46,7 @@ class PlannerRequest(BaseModel):
     provider: str | None = Field(default=None, description="'openai' | 'gemini'")
     model: str | None = Field(default=None)
     api_key: str | None = Field(default=None, description="Optional API key (or use env)")
+    use_baml: bool | None = Field(default=False, description="If true and baml_client is available, use BAML")
 
 
 class PlanStep(BaseModel):

@@ -33,6 +33,34 @@ Open `http://127.0.0.1:8000/` to use the UI.
 
 Each step is validated against the target skill's `input_schema` using JSON Schema (Draft 2020-12). Unknown skills or invalid inputs are rejected.
 
+## BAML Integration (optional, recommended for predictability)
+
+1) Install BAML runtime (already in requirements):
+```bash
+pip install baml-py
+```
+
+2) Initialize BAML (creates `baml_src/`):
+```bash
+# Option A: npx (requires Node.js):
+# npx baml-cli@latest init && npx baml-cli@latest generate
+
+# Option B: Python-only install of CLI (if available on your system PATH):
+baml-cli init && baml-cli generate
+```
+
+3) Add the provided `.baml` files in `baml_src/` (already included), then generate client:
+```bash
+# npx baml-cli@latest generate
+baml-cli generate
+```
+This creates `baml_client/` used by the backend.
+
+4) Run the app. In the UI, toggle “Use BAML” to route planning through BAML. Provider/model selection still applies; BAML enforces a schema-locked response.
+
+Environment variables:
+- `OPENAI_API_KEY` or `GEMINI_API_KEY` are used by your BAML client definitions.
+
 ## Project layout
 
 ```

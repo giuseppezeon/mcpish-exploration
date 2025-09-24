@@ -38,12 +38,13 @@ async function plan(){
   const provider = document.getElementById('provider').value;
   const model = document.getElementById('model').value;
   const apiKey = document.getElementById('apiKey').value;
+  const useBaml = document.getElementById('useBaml').checked;
   const output = document.getElementById('planOutput');
   output.textContent = 'Planning…';
   try{
     const result = await fetchJSON('/api/plan', {
       method: 'POST',
-      body: JSON.stringify({ task: input.value, context: {}, provider, model, api_key: apiKey || null })
+      body: JSON.stringify({ task: input.value, context: {}, provider, model, api_key: apiKey || null, use_baml: useBaml })
     });
     output.textContent = JSON.stringify(result, null, 2);
   }catch(e){

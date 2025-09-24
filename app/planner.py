@@ -19,6 +19,11 @@ try:
 except Exception:  # pragma: no cover
     genai_pkg = None  # type: ignore
 
+try:
+    from baml_client import b as baml_b  # generated client entrypoint
+    BAML_AVAILABLE = True
+except Exception:  # pragma: no cover
+    BAML_AVAILABLE = False
 
 class AIPlanner:
     """Provider-agnostic AI planner with schema validation and registry awareness."""
@@ -128,6 +133,26 @@ class AIPlanner:
     def plan(self, req: PlannerRequest) -> PlanResult:
         provider = (req.provider or "openai").lower()
         try:
+            # Optional BAML integration when requested and available
+            if req.use_baml and BAML_AVAILABLE:
+                # Expect a BAML function that yields a plan-like structure
+                # For now call a generic function if present, else fall through
+                try:
+                    # Example BAML function name: PlanWithSkills
+                    raw = baml_b.PlanWithSkills(
+                        {
+                            "task": req.task,
+                            "skills": self._serialize_registry(),
+                            "provider": provider,
+                            "model": req.model or "",
+                        }
+                    )
+                except Exception:
+                    raw = None
+                if isinstance(raw, dict) and isinstance(raw.get("steps"), list):
+                    steps = self._validate_steps(raw["steps"])
+                    return PlanResult(task=req.task, steps=steps, notes=f"Provider: baml->{provider}")
+
             if provider == "openai":
                 raw = self._call_openai(req)
             elif provider == "gemini":
