@@ -47,6 +47,8 @@ web/.cache/
 # Env files
 *.env
 .env.*
+!.env.example
 
 # Local data
 *.sqlite3
+.env
