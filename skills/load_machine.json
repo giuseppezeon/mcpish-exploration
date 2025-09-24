@@ -1,7 +1,7 @@
 {
   "name": "load_machine",
   "version": "1.0.0",
-  "description": "Load a sample or plate into a laboratory machine (centrifuge, incubator, etc.)",
+  "description": "Load a sample or plate into a laboratory machine using machine database waypoints",
   "tier": "T2",
   "input_schema": {
     "type": "object",
@@ -31,7 +31,7 @@
       "estimated_completion": {"type": "string"}
     }
   },
-  "preconditions": ["machine_ready", "sample_accessible", "machine_door_open", "workspace_clear"],
+  "preconditions": ["machine_ready", "sample_accessible", "workspace_clear", "machine_database_available"],
   "postconditions": ["sample_loaded", "machine_configured", "process_started"],
   "invariants": ["sample_secured", "machine_operational"],
   "timeout_s": 300,
@@ -69,6 +69,10 @@
   "compatibility": {
     "machine_types": ["centrifuge", "incubator", "shaker", "thermocycler", "spectrophotometer"],
     "sample_types": ["plates", "tubes", "slides", "cuvettes"]
+  },
+  "machine_database": {
+    "waypoints": ["approach", "open_door", "load_position", "close_door", "retreat"],
+    "operations": ["open_door", "close_door", "get_status"]
   },
   "telemetry_schema": {
     "machine_temperature": "number",

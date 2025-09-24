@@ -1,0 +1,61 @@
+{
+  "name": "unload_machine",
+  "version": "1.0.0",
+  "description": "Unload samples from a laboratory machine using machine database waypoints",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "machine_id": {"type": "string"},
+      "sample_id": {"type": "string"},
+      "destination_position": {"type": "string"},
+      "safety_checks": {"type": "boolean", "default": true},
+      "force": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0}
+    },
+    "required": ["machine_id", "sample_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "sample_retrieved": {"type": "boolean"},
+      "destination_position": {"type": "string"},
+      "machine_status": {"type": "string"}
+    }
+  },
+  "preconditions": ["machine_ready", "sample_accessible", "destination_accessible", "machine_database_available"],
+  "postconditions": ["sample_unloaded", "machine_available"],
+  "invariants": ["sample_secured", "machine_operational"],
+  "timeout_s": 300,
+  "safety": {
+    "machine_interlocks": true,
+    "sample_protection": true,
+    "contamination_prevention": true
+  },
+  "failure_modes": [
+    {
+      "mode": "sample_stuck",
+      "mitigation": "adjust_grasp_and_retry"
+    },
+    {
+      "mode": "machine_not_ready",
+      "mitigation": "wait_for_completion"
+    },
+    {
+      "mode": "destination_occupied",
+      "mitigation": "find_alternative_destination"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 120,
+    "energy_cost": "high"
+  },
+  "machine_database": {
+    "waypoints": ["approach", "open_door", "unload_position", "close_door", "retreat"],
+    "operations": ["open_door", "close_door", "get_status"]
+  }
+}

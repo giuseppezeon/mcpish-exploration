@@ -1,0 +1,221 @@
+{
+  "machines": {
+    "centrifuge_1": {
+      "name": "Centrifuge Station 1",
+      "type": "centrifuge",
+      "location": "A1",
+      "waypoints": {
+        "approach": {"x": 100, "y": 200, "z": 50, "rx": 0, "ry": 0, "rz": 0},
+        "open_door": {"x": 95, "y": 195, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "load_position": {"x": 100, "y": 200, "z": 30, "rx": 0, "ry": 0, "rz": 0},
+        "close_door": {"x": 95, "y": 195, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "retreat": {"x": 120, "y": 220, "z": 60, "rx": 0, "ry": 0, "rz": 0}
+      },
+      "operations": {
+        "open_door": {
+          "command": "OPEN_DOOR",
+          "parameters": {},
+          "timeout": 30
+        },
+        "close_door": {
+          "command": "CLOSE_DOOR",
+          "parameters": {},
+          "timeout": 30
+        },
+        "start_cycle": {
+          "command": "START_CYCLE",
+          "parameters": {
+            "rpm": "integer",
+            "duration": "integer",
+            "temperature": "number"
+          },
+          "timeout": 5
+        },
+        "stop_cycle": {
+          "command": "STOP_CYCLE",
+          "parameters": {},
+          "timeout": 10
+        },
+        "get_status": {
+          "command": "GET_STATUS",
+          "parameters": {},
+          "timeout": 5
+        }
+      },
+      "safety_limits": {
+        "max_rpm": 20000,
+        "max_temperature": 40,
+        "max_duration": 3600
+      }
+    },
+    "incubator_1": {
+      "name": "Incubator Station 1",
+      "type": "incubator",
+      "location": "B2",
+      "waypoints": {
+        "approach": {"x": 150, "y": 250, "z": 50, "rx": 0, "ry": 0, "rz": 0},
+        "open_door": {"x": 145, "y": 245, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "load_position": {"x": 150, "y": 250, "z": 30, "rx": 0, "ry": 0, "rz": 0},
+        "close_door": {"x": 145, "y": 245, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "retreat": {"x": 170, "y": 270, "z": 60, "rx": 0, "ry": 0, "rz": 0}
+      },
+      "operations": {
+        "open_door": {
+          "command": "OPEN_DOOR",
+          "parameters": {},
+          "timeout": 30
+        },
+        "close_door": {
+          "command": "CLOSE_DOOR",
+          "parameters": {},
+          "timeout": 30
+        },
+        "set_temperature": {
+          "command": "SET_TEMPERATURE",
+          "parameters": {
+            "temperature": "number"
+          },
+          "timeout": 10
+        },
+        "set_humidity": {
+          "command": "SET_HUMIDITY",
+          "parameters": {
+            "humidity": "number"
+          },
+          "timeout": 10
+        },
+        "start_incubation": {
+          "command": "START_INCUBATION",
+          "parameters": {
+            "duration": "integer"
+          },
+          "timeout": 5
+        },
+        "get_status": {
+          "command": "GET_STATUS",
+          "parameters": {},
+          "timeout": 5
+        }
+      },
+      "safety_limits": {
+        "max_temperature": 95,
+        "max_humidity": 100,
+        "max_duration": 86400
+      }
+    },
+    "thermocycler_1": {
+      "name": "Thermocycler Station 1",
+      "type": "thermocycler",
+      "location": "C3",
+      "waypoints": {
+        "approach": {"x": 200, "y": 300, "z": 50, "rx": 0, "ry": 0, "rz": 0},
+        "open_lid": {"x": 195, "y": 295, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "load_position": {"x": 200, "y": 300, "z": 30, "rx": 0, "ry": 0, "rz": 0},
+        "close_lid": {"x": 195, "y": 295, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "retreat": {"x": 220, "y": 320, "z": 60, "rx": 0, "ry": 0, "rz": 0}
+      },
+      "operations": {
+        "open_lid": {
+          "command": "OPEN_LID",
+          "parameters": {},
+          "timeout": 30
+        },
+        "close_lid": {
+          "command": "CLOSE_LID",
+          "parameters": {},
+          "timeout": 30
+        },
+        "start_protocol": {
+          "command": "START_PROTOCOL",
+          "parameters": {
+            "protocol_name": "string",
+            "cycles": "integer"
+          },
+          "timeout": 5
+        },
+        "set_temperature": {
+          "command": "SET_TEMPERATURE",
+          "parameters": {
+            "temperature": "number"
+          },
+          "timeout": 10
+        },
+        "get_status": {
+          "command": "GET_STATUS",
+          "parameters": {},
+          "timeout": 5
+        }
+      },
+      "safety_limits": {
+        "max_temperature": 100,
+        "max_cycles": 50,
+        "max_duration": 7200
+      }
+    },
+    "spectrophotometer_1": {
+      "name": "Spectrophotometer Station 1",
+      "type": "spectrophotometer",
+      "location": "D4",
+      "waypoints": {
+        "approach": {"x": 250, "y": 350, "z": 50, "rx": 0, "ry": 0, "rz": 0},
+        "open_door": {"x": 245, "y": 345, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "load_position": {"x": 250, "y": 350, "z": 30, "rx": 0, "ry": 0, "rz": 0},
+        "close_door": {"x": 245, "y": 345, "z": 45, "rx": 0, "ry": 0, "rz": 0},
+        "retreat": {"x": 270, "y": 370, "z": 60, "rx": 0, "ry": 0, "rz": 0}
+      },
+      "operations": {
+        "open_door": {
+          "command": "OPEN_DOOR",
+          "parameters": {},
+          "timeout": 30
+        },
+        "close_door": {
+          "command": "CLOSE_DOOR",
+          "parameters": {},
+          "timeout": 30
+        },
+        "start_reading": {
+          "command": "START_READING",
+          "parameters": {
+            "wavelengths": "array",
+            "measurement_type": "string"
+          },
+          "timeout": 5
+        },
+        "get_results": {
+          "command": "GET_RESULTS",
+          "parameters": {},
+          "timeout": 10
+        },
+        "get_status": {
+          "command": "GET_STATUS",
+          "parameters": {},
+          "timeout": 5
+        }
+      },
+      "safety_limits": {
+        "max_wavelength": 1000,
+        "min_wavelength": 200,
+        "max_reading_time": 600
+      }
+    }
+  },
+  "machine_types": {
+    "centrifuge": {
+      "common_operations": ["open_door", "close_door", "start_cycle", "stop_cycle", "get_status"],
+      "required_waypoints": ["approach", "open_door", "load_position", "close_door", "retreat"]
+    },
+    "incubator": {
+      "common_operations": ["open_door", "close_door", "set_temperature", "set_humidity", "start_incubation", "get_status"],
+      "required_waypoints": ["approach", "open_door", "load_position", "close_door", "retreat"]
+    },
+    "thermocycler": {
+      "common_operations": ["open_lid", "close_lid", "start_protocol", "set_temperature", "get_status"],
+      "required_waypoints": ["approach", "open_lid", "load_position", "close_lid", "retreat"]
+    },
+    "spectrophotometer": {
+      "common_operations": ["open_door", "close_door", "start_reading", "get_results", "get_status"],
+      "required_waypoints": ["approach", "open_door", "load_position", "close_door", "retreat"]
+    }
+  }
+}

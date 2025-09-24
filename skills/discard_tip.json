@@ -1,0 +1,65 @@
+{
+  "name": "discard_tip",
+  "version": "1.0.0",
+  "description": "Discard used pipette tip to waste container",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "waste_position": {"type": "string"},
+      "force": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
+      "ejection_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0},
+      "rinse_before_discard": {"type": "boolean", "default": true}
+    },
+    "required": ["pipette_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "tip_discarded": {"type": "boolean"},
+      "waste_position": {"type": "string"},
+      "ejection_time": {"type": "number"}
+    }
+  },
+  "preconditions": ["pipette_ready", "tip_attached", "waste_accessible"],
+  "postconditions": ["tip_discarded", "pipette_clean"],
+  "invariants": ["no_contamination", "waste_contained"],
+  "timeout_s": 15,
+  "safety": {
+    "waste_containment": true,
+    "force_limits": true,
+    "contamination_prevention": true
+  },
+  "failure_modes": [
+    {
+      "mode": "tip_stuck",
+      "mitigation": "increase_ejection_force"
+    },
+    {
+      "mode": "waste_full",
+      "mitigation": "alert_operator"
+    },
+    {
+      "mode": "tip_damaged",
+      "mitigation": "manual_removal"
+    },
+    {
+      "mode": "contamination_risk",
+      "mitigation": "rinse_and_retry"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 8,
+    "energy_cost": "low"
+  },
+  "compatibility": {
+    "pipette_types": ["electronic", "manual"],
+    "waste_containers": ["standard", "hazardous"]
+  }
+}
