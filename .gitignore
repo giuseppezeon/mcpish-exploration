@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.build/
+.python-version
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+
+# Package build
+pip-wheel-metadata/
+dist/
+build/
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Web/Node
+node_modules/
+web/dist/
+web/build/
+web/.parcel-cache/
+web/.cache/
+
+# Env files
+*.env
+.env.*
+
+# Local data
+*.sqlite3
