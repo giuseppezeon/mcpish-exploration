@@ -1,0 +1,21 @@
+:root{
+  --bg:#0b0f14; --card:#121821; --text:#e6edf3; --muted:#9fb0c3; --accent:#2ea043; --border:#243041;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial}
+header{padding:16px 20px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#0e141b,#0b0f14)}
+h1{margin:0;font-size:20px}
+main{max-width:1000px;margin:24px auto;padding:0 16px;display:grid;gap:24px}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.row{display:flex;gap:8px}
+input{flex:1;background:#0a111a;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text)}
+select{background:#0a111a;border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text)}
+button{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:8px;cursor:pointer}
+button:hover{filter:brightness(1.05)}
+.output{background:#0a111a;border:1px solid var(--border);border-radius:8px;padding:12px;min-height:100px;white-space:pre-wrap}
+.skills{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.skill{border:1px solid var(--border);border-radius:10px;padding:12px;background:#0b121b}
+.skill h3{margin:0 0 8px;font-size:16px}
+.muted{color:var(--muted)}
+footer{max-width:1000px;margin:0 auto 24px;padding:0 16px;color:var(--muted)}
+

@@ -1,0 +1,21 @@
+{
+  "name": "centrifuge_cycle",
+  "version": "1.0.0",
+  "description": "Run a centrifuge cycle for a plate at rpm for seconds.",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "plate_id": {"type": "string"},
+      "rpm": {"type": "integer", "minimum": 100},
+      "seconds": {"type": "integer", "minimum": 1}
+    },
+    "required": ["plate_id", "rpm", "seconds"]
+  },
+  "output_schema": {"type": "object"},
+  "preconditions": ["door_closed"],
+  "invariants": ["balance_ok"],
+  "postconditions": ["cycle_complete"],
+  "timeout_s": 900
+}
+

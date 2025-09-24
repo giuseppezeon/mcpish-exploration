@@ -1,0 +1,19 @@
+{
+  "name": "pick_place",
+  "version": "1.0.0",
+  "description": "Pick an object from a source location and place at a target pose.",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "source_id": {"type": "string"},
+      "target_pose": {"type": "object"}
+    },
+    "required": ["source_id", "target_pose"]
+  },
+  "output_schema": {"type": "object"},
+  "preconditions": ["object_accessible", "gripper_ready"],
+  "postconditions": ["object_at_target"],
+  "timeout_s": 120
+}
+

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zeon Planner</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Zeon Planner</h1>
+  </header>
+  <main>
+    <section class="panel">
+      <h2>Plan a Task</h2>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <input id="taskInput" placeholder="Describe the task (e.g., pick and place the tube)" />
+        <select id="provider">
+          <option value="openai">OpenAI</option>
+          <option value="gemini">Gemini</option>
+        </select>
+        <input id="model" placeholder="Model (e.g., gpt-4o-mini, gemini-1.5-pro)" />
+        <input id="apiKey" placeholder="API Key (optional if env set)" />
+        <button id="planBtn">Plan</button>
+      </div>
+      <pre id="planOutput" class="output"></pre>
+    </section>
+
+    <section class="panel">
+      <h2>Skill Library</h2>
+      <div id="skills" class="skills"></div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+  <footer>
+    <a href="/docs" target="_blank">API Docs</a>
+  </footer>
+</body>
+</html>
+
