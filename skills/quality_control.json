@@ -1,0 +1,68 @@
+{
+  "name": "quality_control",
+  "version": "1.0.0",
+  "description": "Perform quality control checks on samples or processes",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "sample_id": {"type": "string"},
+      "qc_type": {
+        "type": "string",
+        "enum": ["volume_check", "concentration_check", "purity_check", "sterility_check", "ph_check"]
+      },
+      "acceptance_criteria": {
+        "type": "object",
+        "properties": {
+          "min_value": {"type": "number"},
+          "max_value": {"type": "number"},
+          "tolerance": {"type": "number"}
+        }
+      },
+      "measurement_method": {"type": "string"},
+      "reference_standard": {"type": "string"}
+    },
+    "required": ["sample_id", "qc_type", "acceptance_criteria"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "qc_passed": {"type": "boolean"},
+      "measured_value": {"type": "number"},
+      "deviation": {"type": "number"},
+      "confidence_level": {"type": "number"},
+      "qc_certificate": {"type": "string"}
+    }
+  },
+  "preconditions": ["sample_accessible", "qc_equipment_ready", "standards_available"],
+  "postconditions": ["qc_completed", "result_documented"],
+  "invariants": ["measurement_accuracy", "standard_integrity"],
+  "timeout_s": 300,
+  "safety": {
+    "sample_protection": true,
+    "measurement_accuracy": true,
+    "data_integrity": true
+  },
+  "failure_modes": [
+    {
+      "mode": "sample_contaminated",
+      "mitigation": "quarantine_and_alert"
+    },
+    {
+      "mode": "equipment_failure",
+      "mitigation": "recalibrate_and_retry"
+    },
+    {
+      "mode": "standard_expired",
+      "mitigation": "replace_standard"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 150,
+    "energy_cost": "medium"
+  }
+}

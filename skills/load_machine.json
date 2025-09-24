@@ -1,0 +1,79 @@
+{
+  "name": "load_machine",
+  "version": "1.0.0",
+  "description": "Load a sample or plate into a laboratory machine (centrifuge, incubator, etc.)",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "machine_id": {"type": "string"},
+      "sample_id": {"type": "string"},
+      "load_position": {"type": "string"},
+      "machine_config": {
+        "type": "object",
+        "properties": {
+          "temperature": {"type": "number"},
+          "humidity": {"type": "number"},
+          "pressure": {"type": "number"},
+          "vibration": {"type": "boolean"}
+        }
+      },
+      "safety_checks": {"type": "boolean", "default": true}
+    },
+    "required": ["machine_id", "sample_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "load_position": {"type": "string"},
+      "machine_status": {"type": "string"},
+      "estimated_completion": {"type": "string"}
+    }
+  },
+  "preconditions": ["machine_ready", "sample_accessible", "machine_door_open", "workspace_clear"],
+  "postconditions": ["sample_loaded", "machine_configured", "process_started"],
+  "invariants": ["sample_secured", "machine_operational"],
+  "timeout_s": 300,
+  "safety": {
+    "machine_interlocks": true,
+    "emergency_stop": true,
+    "contamination_prevention": true
+  },
+  "failure_modes": [
+    {
+      "mode": "machine_not_ready",
+      "mitigation": "wait_and_retry"
+    },
+    {
+      "mode": "sample_damaged",
+      "mitigation": "abort_and_alert"
+    },
+    {
+      "mode": "position_conflict",
+      "mitigation": "recalculate_position"
+    },
+    {
+      "mode": "machine_fault",
+      "mitigation": "emergency_stop_and_alert"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 2.0
+  },
+  "cost_model": {
+    "estimated_duration": 120,
+    "energy_cost": "high"
+  },
+  "compatibility": {
+    "machine_types": ["centrifuge", "incubator", "shaker", "thermocycler", "spectrophotometer"],
+    "sample_types": ["plates", "tubes", "slides", "cuvettes"]
+  },
+  "telemetry_schema": {
+    "machine_temperature": "number",
+    "machine_humidity": "number",
+    "load_force": "number",
+    "position_accuracy": "number"
+  }
+}

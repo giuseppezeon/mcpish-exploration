@@ -1,0 +1,50 @@
+{
+  "name": "align_objects",
+  "version": "1.0.0",
+  "description": "Align two objects relative to each other with specified orientation",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "object1_id": {"type": "string"},
+      "object2_id": {"type": "string"},
+      "alignment_type": {
+        "type": "string",
+        "enum": ["parallel", "perpendicular", "coaxial", "custom"]
+      },
+      "tolerance": {"type": "number", "minimum": 0.001, "maximum": 0.1, "default": 0.01},
+      "custom_angle": {"type": "number", "minimum": 0, "maximum": 360}
+    },
+    "required": ["object1_id", "object2_id", "alignment_type"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "alignment_achieved": {"type": "boolean"},
+      "final_angle": {"type": "number"},
+      "deviation": {"type": "number"}
+    }
+  },
+  "preconditions": ["objects_visible", "objects_accessible", "gripper_ready"],
+  "postconditions": ["objects_aligned"],
+  "invariants": ["objects_secured"],
+  "timeout_s": 45,
+  "safety": {
+    "collision_detection": true,
+    "force_limits": true
+  },
+  "failure_modes": [
+    {
+      "mode": "alignment_failed",
+      "mitigation": "adjust_tolerance"
+    },
+    {
+      "mode": "object_slipped",
+      "mitigation": "regrasp_and_retry"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 15,
+    "energy_cost": "medium"
+  }
+}

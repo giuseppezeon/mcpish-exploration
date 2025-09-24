@@ -1,0 +1,60 @@
+{
+  "name": "change_tip",
+  "version": "1.0.0",
+  "description": "Change pipette tip - discard old tip and pick up new one",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "tip_type": {"type": "string", "enum": ["p10", "p20", "p200", "p1000", "p5000"]},
+      "tip_rack_position": {"type": "string"},
+      "waste_position": {"type": "string"},
+      "force": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0}
+    },
+    "required": ["pipette_id", "tip_type"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "new_tip_position": {"type": "string"},
+      "tip_quality": {"type": "string"}
+    }
+  },
+  "preconditions": ["pipette_ready", "tip_rack_available", "waste_accessible"],
+  "postconditions": ["new_tip_attached", "old_tip_discarded"],
+  "invariants": ["pipette_clean"],
+  "timeout_s": 30,
+  "safety": {
+    "tip_detection": true,
+    "force_limits": true,
+    "contamination_prevention": true
+  },
+  "failure_modes": [
+    {
+      "mode": "tip_not_detected",
+      "mitigation": "retry_with_higher_force"
+    },
+    {
+      "mode": "tip_rack_empty",
+      "mitigation": "alert_operator"
+    },
+    {
+      "mode": "tip_damaged",
+      "mitigation": "discard_and_retry"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 3,
+    "backoff_factor": 1.2
+  },
+  "cost_model": {
+    "estimated_duration": 15,
+    "energy_cost": "low"
+  },
+  "compatibility": {
+    "pipette_types": ["electronic", "manual"],
+    "tip_racks": ["standard", "filtered"]
+  }
+}

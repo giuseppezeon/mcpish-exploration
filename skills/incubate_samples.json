@@ -1,0 +1,58 @@
+{
+  "name": "incubate_samples",
+  "version": "1.0.0",
+  "description": "Incubate samples at specified temperature and conditions",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "sample_ids": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "temperature": {"type": "number", "minimum": 4, "maximum": 95},
+      "duration": {"type": "integer", "minimum": 1, "maximum": 86400},
+      "humidity": {"type": "number", "minimum": 0, "maximum": 100},
+      "co2_level": {"type": "number", "minimum": 0, "maximum": 20},
+      "shaking": {"type": "boolean", "default": false},
+      "shaking_speed": {"type": "integer", "minimum": 0, "maximum": 500}
+    },
+    "required": ["sample_ids", "temperature", "duration"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "incubation_started": {"type": "string"},
+      "estimated_completion": {"type": "string"},
+      "incubator_status": {"type": "string"}
+    }
+  },
+  "preconditions": ["incubator_ready", "samples_accessible", "temperature_achievable"],
+  "postconditions": ["samples_incubating", "conditions_set"],
+  "invariants": ["temperature_stable", "samples_secured"],
+  "timeout_s": 300,
+  "safety": {
+    "temperature_limits": true,
+    "sample_protection": true,
+    "incubator_monitoring": true
+  },
+  "failure_modes": [
+    {
+      "mode": "temperature_failure",
+      "mitigation": "emergency_cooling"
+    },
+    {
+      "mode": "power_failure",
+      "mitigation": "backup_power"
+    },
+    {
+      "mode": "sample_contamination",
+      "mitigation": "quarantine_samples"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 180,
+    "energy_cost": "high"
+  }
+}

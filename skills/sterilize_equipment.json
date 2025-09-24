@@ -1,0 +1,56 @@
+{
+  "name": "sterilize_equipment",
+  "version": "1.0.0",
+  "description": "Sterilize laboratory equipment using appropriate methods",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "equipment_ids": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "sterilization_method": {
+        "type": "string",
+        "enum": ["autoclave", "uv_sterilization", "chemical", "heat", "plasma"],
+        "default": "autoclave"
+      },
+      "temperature": {"type": "number", "minimum": 60, "maximum": 200},
+      "duration": {"type": "integer", "minimum": 1, "maximum": 3600},
+      "pressure": {"type": "number", "minimum": 0, "maximum": 3},
+      "sterilization_cycle": {"type": "string", "default": "standard"}
+    },
+    "required": ["equipment_ids", "sterilization_method"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "sterilization_time": {"type": "number"},
+      "sterilization_certificate": {"type": "string"},
+      "equipment_status": {"type": "array"}
+    }
+  },
+  "preconditions": ["equipment_accessible", "sterilization_equipment_ready"],
+  "postconditions": ["equipment_sterilized", "certificate_generated"],
+  "timeout_s": 3600,
+  "safety": {
+    "temperature_limits": true,
+    "pressure_limits": true,
+    "chemical_safety": true
+  },
+  "failure_modes": [
+    {
+      "mode": "sterilization_failure",
+      "mitigation": "repeat_cycle"
+    },
+    {
+      "mode": "equipment_damage",
+      "mitigation": "abort_and_alert"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 1800,
+    "energy_cost": "very_high"
+  }
+}

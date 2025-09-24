@@ -1,0 +1,68 @@
+{
+  "name": "mix",
+  "version": "1.0.0",
+  "description": "Mix liquid in a container using pipette mixing cycles",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "container_position": {"type": "string"},
+      "volume": {"type": "number", "minimum": 1, "maximum": 1000},
+      "cycles": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5},
+      "mix_height": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0},
+      "speed": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
+      "pattern": {
+        "type": "string",
+        "enum": ["vertical", "circular", "figure8", "vortex"],
+        "default": "vertical"
+      }
+    },
+    "required": ["pipette_id", "container_position", "volume"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "cycles_completed": {"type": "integer"},
+      "mixing_time": {"type": "number"},
+      "final_volume": {"type": "number"}
+    }
+  },
+  "preconditions": ["pipette_ready", "tip_attached", "container_accessible", "sufficient_liquid"],
+  "postconditions": ["liquid_mixed", "homogeneous_solution"],
+  "invariants": ["no_contamination", "volume_preserved"],
+  "timeout_s": 60,
+  "safety": {
+    "volume_limits": true,
+    "speed_limits": true,
+    "splash_prevention": true
+  },
+  "failure_modes": [
+    {
+      "mode": "insufficient_liquid",
+      "mitigation": "reduce_mix_volume"
+    },
+    {
+      "mode": "splash_risk",
+      "mitigation": "reduce_speed_and_height"
+    },
+    {
+      "mode": "tip_damage",
+      "mitigation": "change_tip_and_retry"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 1.3
+  },
+  "cost_model": {
+    "estimated_duration": 30,
+    "energy_cost": "medium"
+  },
+  "telemetry_schema": {
+    "mixing_efficiency": "number",
+    "liquid_turbulence": "number",
+    "tip_wear": "number"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "name": "emergency_stop",
+  "version": "1.0.0",
+  "description": "Emergency stop all robot operations and return to safe state",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "reason": {"type": "string"},
+      "severity": {
+        "type": "string",
+        "enum": ["low", "medium", "high", "critical"],
+        "default": "high"
+      },
+      "preserve_samples": {"type": "boolean", "default": true},
+      "return_to_home": {"type": "boolean", "default": true}
+    },
+    "required": ["reason"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "stop_time": {"type": "number"},
+      "samples_secured": {"type": "boolean"},
+      "robot_state": {"type": "string"}
+    }
+  },
+  "preconditions": ["robot_operational"],
+  "postconditions": ["robot_stopped", "samples_secured", "emergency_logged"],
+  "timeout_s": 5,
+  "safety": {
+    "immediate_stop": true,
+    "sample_protection": true,
+    "system_shutdown": true
+  },
+  "failure_modes": [
+    {
+      "mode": "stop_failure",
+      "mitigation": "power_cutoff"
+    },
+    {
+      "mode": "sample_damage",
+      "mitigation": "manual_intervention"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 2,
+    "energy_cost": "low"
+  },
+  "priority": "critical"
+}

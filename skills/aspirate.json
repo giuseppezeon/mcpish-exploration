@@ -1,0 +1,68 @@
+{
+  "name": "aspirate",
+  "version": "1.0.0",
+  "description": "Aspirate liquid from a source container using pipette",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "volume": {"type": "number", "minimum": 0.1, "maximum": 5000},
+      "source_position": {"type": "string"},
+      "aspiration_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0},
+      "pre_wet": {"type": "boolean", "default": false},
+      "mix_before": {"type": "boolean", "default": false},
+      "mix_cycles": {"type": "integer", "minimum": 1, "maximum": 10, "default": 3}
+    },
+    "required": ["pipette_id", "volume", "source_position"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "actual_volume": {"type": "number"},
+      "liquid_level": {"type": "number"},
+      "aspiration_time": {"type": "number"}
+    }
+  },
+  "preconditions": ["pipette_ready", "tip_attached", "source_accessible", "sufficient_liquid"],
+  "postconditions": ["liquid_aspirated", "tip_contains_liquid"],
+  "invariants": ["no_contamination", "volume_accurate"],
+  "timeout_s": 45,
+  "safety": {
+    "volume_limits": true,
+    "speed_limits": true,
+    "liquid_detection": true
+  },
+  "failure_modes": [
+    {
+      "mode": "insufficient_liquid",
+      "mitigation": "check_source_and_retry"
+    },
+    {
+      "mode": "volume_error",
+      "mitigation": "recalibrate_pipette"
+    },
+    {
+      "mode": "tip_clogged",
+      "mitigation": "change_tip_and_retry"
+    },
+    {
+      "mode": "air_bubble",
+      "mitigation": "expel_and_reaspirate"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 20,
+    "energy_cost": "low"
+  },
+  "telemetry_schema": {
+    "aspiration_pressure": "number",
+    "liquid_temperature": "number",
+    "tip_condition": "string"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "pose_estimation",
+  "version": "1.0.0",
+  "description": "Estimate the 6DOF pose of an object using computer vision",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "object_id": {"type": "string"},
+      "object_type": {"type": "string"},
+      "reference_frame": {"type": "string", "default": "camera"},
+      "confidence_threshold": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.7},
+      "use_depth": {"type": "boolean", "default": true}
+    },
+    "required": ["object_id", "object_type"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "pose": {
+        "type": "object",
+        "properties": {
+          "position": {"type": "object"},
+          "orientation": {"type": "object"}
+        }
+      },
+      "confidence": {"type": "number"},
+      "covariance": {"type": "object"},
+      "timestamp": {"type": "string"}
+    }
+  },
+  "preconditions": ["camera_ready", "object_visible", "good_lighting"],
+  "postconditions": ["pose_estimated"],
+  "timeout_s": 10,
+  "safety": {
+    "max_processing_time": 8,
+    "fallback_to_manual": true
+  },
+  "failure_modes": [
+    {
+      "mode": "low_confidence",
+      "mitigation": "adjust_lighting_or_angle"
+    },
+    {
+      "mode": "object_occluded",
+      "mitigation": "move_camera"
+    },
+    {
+      "mode": "unknown_object",
+      "mitigation": "use_template_matching"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 3,
+    "energy_cost": "low"
+  },
+  "telemetry_schema": {
+    "processing_time": "number",
+    "image_resolution": "string",
+    "detection_confidence": "number"
+  }
+}

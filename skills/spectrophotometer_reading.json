@@ -1,0 +1,69 @@
+{
+  "name": "spectrophotometer_reading",
+  "version": "1.0.0",
+  "description": "Take spectrophotometer readings of samples at specified wavelengths",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "sample_ids": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "wavelengths": {
+        "type": "array",
+        "items": {"type": "number", "minimum": 200, "maximum": 1000}
+      },
+      "measurement_type": {
+        "type": "string",
+        "enum": ["absorbance", "transmittance", "fluorescence", "turbidity"],
+        "default": "absorbance"
+      },
+      "blank_correction": {"type": "boolean", "default": true},
+      "replicate_readings": {"type": "integer", "minimum": 1, "maximum": 10, "default": 3},
+      "integration_time": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0}
+    },
+    "required": ["sample_ids", "wavelengths"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "readings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "sample_id": {"type": "string"},
+            "wavelength": {"type": "number"},
+            "value": {"type": "number"},
+            "standard_deviation": {"type": "number"}
+          }
+        }
+      },
+      "measurement_time": {"type": "string"},
+      "instrument_status": {"type": "string"}
+    }
+  },
+  "preconditions": ["spectrophotometer_ready", "samples_accessible", "light_source_stable"],
+  "postconditions": ["readings_completed", "data_recorded"],
+  "timeout_s": 600,
+  "safety": {
+    "light_source_limits": true,
+    "sample_protection": true
+  },
+  "failure_modes": [
+    {
+      "mode": "light_source_failure",
+      "mitigation": "warm_up_and_retry"
+    },
+    {
+      "mode": "sample_contamination",
+      "mitigation": "clean_cuvette_and_retry"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 300,
+    "energy_cost": "medium"
+  }
+}

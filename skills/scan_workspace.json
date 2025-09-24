@@ -1,0 +1,48 @@
+{
+  "name": "scan_workspace",
+  "version": "1.0.0",
+  "description": "Scan and map the robot workspace to identify objects and obstacles",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "scan_resolution": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
+      "scan_height": {"type": "number", "minimum": 0, "maximum": 50, "default": 10},
+      "object_detection": {"type": "boolean", "default": true},
+      "obstacle_detection": {"type": "boolean", "default": true},
+      "save_map": {"type": "boolean", "default": true}
+    },
+    "required": []
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "objects_detected": {"type": "integer"},
+      "obstacles_detected": {"type": "integer"},
+      "workspace_dimensions": {"type": "object"},
+      "map_file": {"type": "string"}
+    }
+  },
+  "preconditions": ["camera_ready", "workspace_accessible"],
+  "postconditions": ["workspace_mapped", "objects_identified"],
+  "timeout_s": 120,
+  "safety": {
+    "collision_avoidance": true,
+    "scan_limits": true
+  },
+  "failure_modes": [
+    {
+      "mode": "poor_lighting",
+      "mitigation": "adjust_lighting_and_retry"
+    },
+    {
+      "mode": "camera_occlusion",
+      "mitigation": "move_camera_and_retry"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 60,
+    "energy_cost": "medium"
+  }
+}

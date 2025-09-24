@@ -1,0 +1,64 @@
+{
+  "name": "transfer_liquid",
+  "version": "1.0.0",
+  "description": "Transfer liquid from source to destination with volume control",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "source_position": {"type": "string"},
+      "destination_position": {"type": "string"},
+      "volume": {"type": "number", "minimum": 0.1, "maximum": 1000},
+      "pipette_id": {"type": "string"},
+      "transfer_mode": {
+        "type": "string",
+        "enum": ["direct", "multi_dispense", "serial_dilution"],
+        "default": "direct"
+      },
+      "mix_before": {"type": "boolean", "default": false},
+      "mix_after": {"type": "boolean", "default": false},
+      "touch_off": {"type": "boolean", "default": true}
+    },
+    "required": ["source_position", "destination_position", "volume", "pipette_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "actual_volume": {"type": "number"},
+      "transfer_time": {"type": "number"},
+      "accuracy": {"type": "number"}
+    }
+  },
+  "preconditions": ["pipette_ready", "source_accessible", "destination_accessible", "sufficient_volume"],
+  "postconditions": ["liquid_transferred", "volume_accurate"],
+  "invariants": ["no_contamination", "volume_preserved"],
+  "timeout_s": 120,
+  "safety": {
+    "volume_limits": true,
+    "overflow_protection": true,
+    "contamination_prevention": true
+  },
+  "failure_modes": [
+    {
+      "mode": "insufficient_volume",
+      "mitigation": "check_source_and_abort"
+    },
+    {
+      "mode": "destination_full",
+      "mitigation": "check_capacity_and_retry"
+    },
+    {
+      "mode": "volume_error",
+      "mitigation": "recalibrate_and_retry"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 3,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 60,
+    "energy_cost": "medium"
+  }
+}

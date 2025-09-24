@@ -1,0 +1,69 @@
+{
+  "name": "dispense",
+  "version": "1.0.0",
+  "description": "Dispense liquid from pipette to target container",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "volume": {"type": "number", "minimum": 0.1, "maximum": 5000},
+      "target_position": {"type": "string"},
+      "dispense_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0},
+      "blowout": {"type": "boolean", "default": true},
+      "touch_off": {"type": "boolean", "default": false},
+      "mix_after": {"type": "boolean", "default": false},
+      "mix_cycles": {"type": "integer", "minimum": 1, "maximum": 10, "default": 3}
+    },
+    "required": ["pipette_id", "volume", "target_position"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "actual_volume": {"type": "number"},
+      "dispense_time": {"type": "number"},
+      "remaining_volume": {"type": "number"}
+    }
+  },
+  "preconditions": ["pipette_ready", "tip_contains_liquid", "target_accessible"],
+  "postconditions": ["liquid_dispensed", "target_contains_liquid"],
+  "invariants": ["no_contamination", "volume_accurate"],
+  "timeout_s": 45,
+  "safety": {
+    "volume_limits": true,
+    "speed_limits": true,
+    "overflow_protection": true
+  },
+  "failure_modes": [
+    {
+      "mode": "target_full",
+      "mitigation": "check_capacity_and_retry"
+    },
+    {
+      "mode": "volume_error",
+      "mitigation": "recalibrate_pipette"
+    },
+    {
+      "mode": "tip_droplet",
+      "mitigation": "touch_off_and_retry"
+    },
+    {
+      "mode": "incomplete_dispense",
+      "mitigation": "blowout_and_retry"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 2,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 20,
+    "energy_cost": "low"
+  },
+  "telemetry_schema": {
+    "dispense_pressure": "number",
+    "target_temperature": "number",
+    "droplet_formation": "boolean"
+  }
+}

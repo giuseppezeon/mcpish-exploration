@@ -1,0 +1,52 @@
+{
+  "name": "measure_volume",
+  "version": "1.0.0",
+  "description": "Measure liquid volume in a container using various methods",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "container_id": {"type": "string"},
+      "measurement_method": {
+        "type": "string",
+        "enum": ["gravimetric", "volumetric", "optical", "capacitive"],
+        "default": "gravimetric"
+      },
+      "precision": {"type": "number", "minimum": 0.001, "maximum": 1.0, "default": 0.01},
+      "calibration_standard": {"type": "string"},
+      "temperature_compensation": {"type": "boolean", "default": true}
+    },
+    "required": ["container_id", "measurement_method"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "volume": {"type": "number"},
+      "uncertainty": {"type": "number"},
+      "measurement_time": {"type": "string"},
+      "method_used": {"type": "string"}
+    }
+  },
+  "preconditions": ["container_accessible", "measurement_equipment_ready"],
+  "postconditions": ["volume_measured", "result_recorded"],
+  "timeout_s": 60,
+  "safety": {
+    "measurement_accuracy": true,
+    "equipment_protection": true
+  },
+  "failure_modes": [
+    {
+      "mode": "measurement_error",
+      "mitigation": "recalibrate_and_retry"
+    },
+    {
+      "mode": "container_damaged",
+      "mitigation": "abort_measurement"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 30,
+    "energy_cost": "low"
+  }
+}

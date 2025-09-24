@@ -1,0 +1,61 @@
+{
+  "name": "grab_object",
+  "version": "1.0.0",
+  "description": "Grasp an object with the robot gripper",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "object_id": {"type": "string"},
+      "grasp_pose": {
+        "type": "object",
+        "properties": {
+          "position": {"type": "object"},
+          "orientation": {"type": "object"}
+        }
+      },
+      "grasp_force": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0},
+      "approach_angle": {"type": "number", "minimum": 0, "maximum": 90, "default": 0}
+    },
+    "required": ["object_id", "grasp_pose"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "grasp_success": {"type": "boolean"},
+      "object_pose": {"type": "object"},
+      "grasp_quality": {"type": "number"}
+    }
+  },
+  "preconditions": ["gripper_ready", "object_visible", "object_accessible"],
+  "postconditions": ["object_grasped"],
+  "invariants": ["gripper_closed", "object_secured"],
+  "timeout_s": 30,
+  "safety": {
+    "max_grasp_force": 10.0,
+    "collision_detection": true,
+    "force_feedback": true
+  },
+  "failure_modes": [
+    {
+      "mode": "object_moved",
+      "mitigation": "recalculate_grasp"
+    },
+    {
+      "mode": "grasp_failed",
+      "mitigation": "retry_with_different_angle"
+    },
+    {
+      "mode": "object_too_heavy",
+      "mitigation": "adjust_grasp_force"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 3,
+    "backoff_factor": 1.5
+  },
+  "cost_model": {
+    "estimated_duration": 10,
+    "energy_cost": "medium"
+  }
+}

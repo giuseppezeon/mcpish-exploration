@@ -1,0 +1,56 @@
+{
+  "name": "pcr_cycle",
+  "version": "1.0.0",
+  "description": "Execute PCR thermal cycling protocol",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "sample_ids": {
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "protocol_name": {"type": "string"},
+      "cycles": {"type": "integer", "minimum": 1, "maximum": 50, "default": 30},
+      "denaturation_temp": {"type": "number", "minimum": 80, "maximum": 100, "default": 95},
+      "denaturation_time": {"type": "integer", "minimum": 1, "maximum": 300, "default": 30},
+      "annealing_temp": {"type": "number", "minimum": 40, "maximum": 80, "default": 60},
+      "annealing_time": {"type": "integer", "minimum": 1, "maximum": 300, "default": 30},
+      "extension_temp": {"type": "number", "minimum": 60, "maximum": 80, "default": 72},
+      "extension_time": {"type": "integer", "minimum": 1, "maximum": 600, "default": 60}
+    },
+    "required": ["sample_ids", "protocol_name"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "cycles_completed": {"type": "integer"},
+      "total_time": {"type": "number"},
+      "protocol_status": {"type": "string"}
+    }
+  },
+  "preconditions": ["thermocycler_ready", "samples_loaded", "reagents_available"],
+  "postconditions": ["pcr_completed", "samples_processed"],
+  "invariants": ["temperature_control", "sample_integrity"],
+  "timeout_s": 7200,
+  "safety": {
+    "temperature_limits": true,
+    "sample_protection": true,
+    "thermal_cycling_monitoring": true
+  },
+  "failure_modes": [
+    {
+      "mode": "thermal_failure",
+      "mitigation": "emergency_cooling"
+    },
+    {
+      "mode": "sample_contamination",
+      "mitigation": "abort_protocol"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 3600,
+    "energy_cost": "very_high"
+  }
+}

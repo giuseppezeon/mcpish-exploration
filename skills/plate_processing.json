@@ -1,0 +1,72 @@
+{
+  "name": "plate_processing",
+  "version": "1.0.0",
+  "description": "Process a microplate with multiple liquid handling operations",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "plate_id": {"type": "string"},
+      "plate_type": {
+        "type": "string",
+        "enum": ["96_well", "384_well", "1536_well"],
+        "default": "96_well"
+      },
+      "operations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "operation": {"type": "string", "enum": ["aspirate", "dispense", "mix", "incubate"]},
+            "wells": {"type": "array", "items": {"type": "string"}},
+            "volume": {"type": "number"},
+            "reagent": {"type": "string"}
+          }
+        }
+      },
+      "incubation_time": {"type": "integer", "minimum": 0, "maximum": 3600},
+      "temperature": {"type": "number", "minimum": 4, "maximum": 95}
+    },
+    "required": ["plate_id", "operations"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "wells_processed": {"type": "integer"},
+      "processing_time": {"type": "number"},
+      "quality_metrics": {"type": "object"}
+    }
+  },
+  "preconditions": ["plate_accessible", "reagents_available", "pipette_ready"],
+  "postconditions": ["plate_processed", "all_operations_complete"],
+  "invariants": ["no_cross_contamination", "volume_accuracy"],
+  "timeout_s": 1800,
+  "safety": {
+    "cross_contamination_prevention": true,
+    "volume_limits": true,
+    "temperature_control": true
+  },
+  "failure_modes": [
+    {
+      "mode": "plate_damaged",
+      "mitigation": "abort_and_alert"
+    },
+    {
+      "mode": "reagent_shortage",
+      "mitigation": "pause_and_alert"
+    },
+    {
+      "mode": "temperature_failure",
+      "mitigation": "emergency_cooling"
+    }
+  ],
+  "retry_policy": {
+    "max_attempts": 1,
+    "backoff_factor": 1.0
+  },
+  "cost_model": {
+    "estimated_duration": 900,
+    "energy_cost": "high"
+  }
+}

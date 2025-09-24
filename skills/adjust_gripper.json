@@ -1,0 +1,54 @@
+{
+  "name": "adjust_gripper",
+  "version": "1.0.0",
+  "description": "Adjust gripper position, force, or configuration",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["open", "close", "set_force", "set_position", "calibrate"]
+      },
+      "force": {"type": "number", "minimum": 0.1, "maximum": 20.0},
+      "position": {"type": "number", "minimum": 0, "maximum": 100},
+      "speed": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.5}
+    },
+    "required": ["action"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "final_position": {"type": "number"},
+      "final_force": {"type": "number"},
+      "gripper_state": {"type": "string"}
+    }
+  },
+  "preconditions": ["gripper_ready"],
+  "postconditions": ["gripper_adjusted"],
+  "timeout_s": 10,
+  "safety": {
+    "force_limits": true,
+    "position_limits": true,
+    "emergency_release": true
+  },
+  "failure_modes": [
+    {
+      "mode": "gripper_stuck",
+      "mitigation": "emergency_release"
+    },
+    {
+      "mode": "force_exceeded",
+      "mitigation": "reduce_force"
+    },
+    {
+      "mode": "position_error",
+      "mitigation": "recalibrate"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 2,
+    "energy_cost": "low"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "name": "move",
+  "version": "1.0.0",
+  "description": "Move robot end-effector with specified rotations and translations",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "rotations": {
+        "type": "object",
+        "properties": {
+          "x": {"type": "number"},
+          "y": {"type": "number"},
+          "z": {"type": "number"}
+        },
+        "required": ["x", "y", "z"]
+      },
+      "translations": {
+        "type": "object",
+        "properties": {
+          "x": {"type": "number"},
+          "y": {"type": "number"},
+          "z": {"type": "number"}
+        },
+        "required": ["x", "y", "z"]
+      },
+      "frame": {"type": "string", "default": "base"},
+      "speed": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.5}
+    },
+    "required": ["rotations", "translations"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "final_pose": {"type": "object"},
+      "execution_time": {"type": "number"}
+    }
+  },
+  "preconditions": ["arm_ready", "workspace_clear"],
+  "postconditions": ["at_target_pose"],
+  "invariants": ["collision_free"],
+  "timeout_s": 60,
+  "safety": {
+    "max_velocity": 0.5,
+    "collision_detection": true,
+    "emergency_stop": true
+  },
+  "failure_modes": [
+    {
+      "mode": "collision_detected",
+      "mitigation": "stop_and_retract"
+    },
+    {
+      "mode": "out_of_workspace",
+      "mitigation": "return_to_safe_pose"
+    }
+  ],
+  "cost_model": {
+    "estimated_duration": 5,
+    "energy_cost": "low"
+  }
+}
