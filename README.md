@@ -8,12 +8,10 @@ A minimal FastAPI-based web app that:
 ## Quickstart
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+make run
 ```
 
-Open `http://127.0.0.1:8000/` to use the UI.
+Open `http://127.0.0.1:8000/` to use the UI. The Makefile will create a venv and install all requirements automatically.
 
 ## AI Planner (OpenAI / Gemini)
 
@@ -35,31 +33,48 @@ Each step is validated against the target skill's `input_schema` using JSON Sche
 
 ## BAML Integration (optional, recommended for predictability)
 
-1) Install BAML runtime (already in requirements):
+By default, BAML runtime (`baml-py`) is installed via requirements. If you want to generate the `baml_client/` code (optional), use:
+
 ```bash
-pip install baml-py
+make baml   # attempts to init+generate via npx or system baml-cli
 ```
 
-2) Initialize BAML (creates `baml_src/`):
-```bash
-# Option A: npx (requires Node.js):
-# npx baml-cli@latest init && npx baml-cli@latest generate
-
-# Option B: Python-only install of CLI (if available on your system PATH):
-baml-cli init && baml-cli generate
-```
-
-3) Add the provided `.baml` files in `baml_src/` (already included), then generate client:
-```bash
-# npx baml-cli@latest generate
-baml-cli generate
-```
-This creates `baml_client/` used by the backend.
-
-4) Run the app. In the UI, toggle “Use BAML” to route planning through BAML. Provider/model selection still applies; BAML enforces a schema-locked response.
+- If the BAML CLI is not available, the app still runs; you can use the non-BAML path (uncheck “Use BAML”).
+- At runtime, simply toggle “Use BAML” in the UI to route planning through BAML. Provider/model selection still applies; BAML enforces schema-locked responses.
 
 Environment variables:
 - `OPENAI_API_KEY` or `GEMINI_API_KEY` are used by your BAML client definitions.
+
+## Skill JSON fields
+
+- `name`: Stable, unique skill identifier (snake_case). Used by planner and executor.
+- `version`: Semver version for pinning and reproducibility.
+- `description`: Human-readable summary shown in UI.
+- `tier`: Granularity, one of `T0` (atomic), `T1` (compound), `T2` (procedural).
+- `input_schema`: JSON Schema for required inputs. Enforced at plan and runtime.
+- `output_schema`: JSON Schema for success output (optional).
+- `error_schema`: Shape of error payloads (optional).
+- `preconditions`: Facts that must hold before execution (symbolic strings).
+- `postconditions`: Facts expected after success.
+- `invariants`: Facts that must hold during execution.
+- `effect_schema`: Structured state changes (optional).
+- `safety`: Safety constraints/metadata (optional).
+- `timeout_s`: Max runtime seconds.
+- `retry_policy`: Retry config (optional).
+- `idempotency`: Idempotence mode (optional).
+- `determinism`: Deterministic or stochastic behavior hints (optional).
+- `simulate`: Simulation support flags (optional).
+- `telemetry_schema`: Extra metrics/events emitted (optional).
+- `cost_model`: Estimated duration/energy for planning (optional).
+- `concurrency`: Parallelism/locking hints (optional).
+- `failure_modes`: Known failures with mitigation (optional).
+- `compensation`: Rollback skill reference (optional).
+- `compatibility`: Supported robots/firmware/api versions (optional).
+- `vendor`: Provider/owner info (optional).
+- `endpoint`: RPC/MCP/ROS endpoint hint (optional).
+- `deprecated`: Set `true` if superseded.
+
+Minimal fields to get started: `name`, `version`, `description`, `tier`, `input_schema`. Add `preconditions`, `postconditions`, and `timeout_s` for safer planning.
 
 ## Project layout
 
