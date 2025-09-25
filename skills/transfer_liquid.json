@@ -1,0 +1,33 @@
+{
+  "name": "transfer_liquid",
+  "description": "Transfer liquid from source to destination with volume control",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "source_position": {"type": "string"},
+      "destination_position": {"type": "string"},
+      "volume": {"type": "number", "minimum": 0.1, "maximum": 1000},
+      "pipette_id": {"type": "string"},
+      "transfer_mode": {
+        "type": "string",
+        "enum": ["direct", "multi_dispense", "serial_dilution"],
+        "default": "direct"
+      },
+      "mix_before": {"type": "boolean", "default": false},
+      "mix_after": {"type": "boolean", "default": false},
+      "touch_off": {"type": "boolean", "default": true}
+    },
+    "required": ["source_position", "destination_position", "volume", "pipette_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "actual_volume": {"type": "number"},
+      "transfer_time": {"type": "number"},
+      "accuracy": {"type": "number"}
+    }
+  },
+  "timeout_s": 120
+}

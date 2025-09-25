@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+from typing import List, Optional
+
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .models import PlannerRequest
 from .planner import AIPlanner
 from .registry import SkillRegistry
-
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB_DIR = ROOT / "web"
@@ -35,8 +36,19 @@ async def index():
 
 
 @app.get("/api/skills")
-async def list_skills():
-    return [s.model_dump() for s in registry.list()]
+async def list_skills(
+    tiers: Optional[List[str]] = Query(
+        None, description="Filter skills by tier (e.g., T0, T1, T2)"
+    ),
+):
+    all_skills = registry.list()
+
+    if tiers is None:
+        return [s.model_dump() for s in all_skills]
+
+    # Filter skills by tier
+    filtered_skills = [s for s in all_skills if s.tier in tiers]
+    return [s.model_dump() for s in filtered_skills]
 
 
 @app.get("/api/skills/{name}")
@@ -51,4 +63,3 @@ async def get_skill(name: str):
 async def create_plan(req: PlannerRequest):
     result = planner.plan(req)
     return result.model_dump()
-

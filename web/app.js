@@ -10,8 +10,23 @@ async function fetchJSON(url, options){
 async function loadSkills(){
   const container = document.getElementById('skills');
   container.innerHTML = '<div class="muted">Loading…</div>';
+
+  // Get selected tiers
+  const selectedTiers = [];
+  if (document.getElementById('tierT0').checked) selectedTiers.push('T0');
+  if (document.getElementById('tierT1').checked) selectedTiers.push('T1');
+  if (document.getElementById('tierT2').checked) selectedTiers.push('T2');
+
   try{
-    const skills = await fetchJSON('/api/skills');
+    // Build URL with tier filters
+    let url = '/api/skills';
+    if (selectedTiers.length > 0) {
+      const params = new URLSearchParams();
+      selectedTiers.forEach(tier => params.append('tiers', tier));
+      url += '?' + params.toString();
+    }
+
+    const skills = await fetchJSON(url);
     container.innerHTML = '';
     skills.forEach(s => {
       const card = document.createElement('div');
@@ -53,5 +68,12 @@ async function plan(){
 }
 
 document.getElementById('planBtn').addEventListener('click', plan);
+document.getElementById('refreshSkills').addEventListener('click', loadSkills);
+
+// Add event listeners for tier checkboxes
+document.getElementById('tierT0').addEventListener('change', loadSkills);
+document.getElementById('tierT1').addEventListener('change', loadSkills);
+document.getElementById('tierT2').addEventListener('change', loadSkills);
+
 window.addEventListener('DOMContentLoaded', loadSkills);
 

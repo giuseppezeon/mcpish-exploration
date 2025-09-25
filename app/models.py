@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
 
 class SkillSpec(BaseModel):
     name: str
-    version: str
+    version: str = "1.0.0"  # Default version if not provided
     description: Optional[str] = None
     tier: Optional[str] = Field(default=None, description="T0 | T1 | T2")
     input_schema: Optional[Dict[str, Any]] = None
@@ -45,8 +46,12 @@ class PlannerRequest(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict)
     provider: str | None = Field(default=None, description="'openai' | 'gemini'")
     model: str | None = Field(default=None)
-    api_key: str | None = Field(default=None, description="Optional API key (or use env)")
-    use_baml: bool | None = Field(default=False, description="If true and baml_client is available, use BAML")
+    api_key: str | None = Field(
+        default=None, description="Optional API key (or use env)"
+    )
+    use_baml: bool | None = Field(
+        default=False, description="If true and baml_client is available, use BAML"
+    )
 
 
 class PlanStep(BaseModel):
@@ -60,4 +65,3 @@ class PlanResult(BaseModel):
     task: str
     steps: List[PlanStep]
     notes: Optional[str] = None
-

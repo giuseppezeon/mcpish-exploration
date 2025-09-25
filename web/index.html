@@ -29,6 +29,18 @@
 
     <section class="panel">
       <h2>Skill Library</h2>
+      <div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:16px">
+        <label style="display:flex;align-items:center;gap:6px;color:#9fb0c3">
+          <input type="checkbox" id="tierT0" checked /> T0 (Basic)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;color:#9fb0c3">
+          <input type="checkbox" id="tierT1" checked /> T1 (Intermediate)
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;color:#9fb0c3">
+          <input type="checkbox" id="tierT2" checked /> T2 (Advanced)
+        </label>
+        <button id="refreshSkills">Refresh</button>
+      </div>
       <div id="skills" class="skills"></div>
     </section>
   </main>

@@ -1,0 +1,24 @@
+{
+  "name": "operate_machine_interface",
+  "description": "Operate machine interface (open/close doors, lids, etc.)",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "machine_id": {"type": "string"},
+      "operation": {
+        "type": "string",
+        "enum": ["open_door", "close_door", "open_lid", "close_lid"]
+      }
+    },
+    "required": ["machine_id", "operation"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "operation_completed": {"type": "string"}
+    }
+  },
+  "timeout_s": 30
+}
