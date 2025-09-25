@@ -1,0 +1,29 @@
+{
+  "name": "emergency_stop",
+  "description": "Emergency stop all robot operations and return to safe state",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "reason": {"type": "string"},
+      "severity": {
+        "type": "string",
+        "enum": ["low", "medium", "high", "critical"],
+        "default": "high"
+      },
+      "preserve_samples": {"type": "boolean", "default": true},
+      "return_to_home": {"type": "boolean", "default": true}
+    },
+    "required": ["reason"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "stop_time": {"type": "number"},
+      "samples_secured": {"type": "boolean"},
+      "robot_state": {"type": "string"}
+    }
+  },
+  "timeout_s": 5
+}

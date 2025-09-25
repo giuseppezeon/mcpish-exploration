@@ -1,0 +1,21 @@
+{
+  "name": "unload_machine",
+  "description": "Unload samples from a laboratory machine",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "machine_id": {"type": "string"},
+      "sample_id": {"type": "string"}
+    },
+    "required": ["machine_id", "sample_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "sample_retrieved": {"type": "boolean"}
+    }
+  },
+  "timeout_s": 60
+}

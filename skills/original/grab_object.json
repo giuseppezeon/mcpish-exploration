@@ -1,0 +1,30 @@
+{
+  "name": "grab_object",
+  "description": "Grasp an object with the robot gripper",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "object_id": {"type": "string"},
+      "grasp_pose": {
+        "type": "object",
+        "properties": {
+          "position": {"type": "object"},
+          "orientation": {"type": "object"}
+        }
+      },
+      "grasp_force": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0},
+      "approach_angle": {"type": "number", "minimum": 0, "maximum": 90, "default": 0}
+    },
+    "required": ["object_id", "grasp_pose"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "grasp_success": {"type": "boolean"},
+      "object_pose": {"type": "object"},
+      "grasp_quality": {"type": "number"}
+    }
+  },
+  "timeout_s": 30
+}

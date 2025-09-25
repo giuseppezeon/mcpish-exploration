@@ -1,0 +1,26 @@
+{
+  "name": "vlm_assert",
+  "description": "Use Vision Language Model to verify scene conditions and object states",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "assertion": {"type": "string"},
+      "object_id": {"type": "string"},
+      "expected_state": {"type": "string"},
+      "confidence_threshold": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.8},
+      "timeout": {"type": "integer", "minimum": 1, "maximum": 60, "default": 10}
+    },
+    "required": ["assertion", "object_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "assertion_passed": {"type": "boolean"},
+      "confidence": {"type": "number"},
+      "reasoning": {"type": "string"},
+      "detected_state": {"type": "string"}
+    }
+  },
+  "timeout_s": 15
+}

@@ -1,0 +1,25 @@
+{
+  "name": "aspirate",
+  "description": "Aspirate liquid from a source container using pipette",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "volume": {"type": "number", "minimum": 0.1, "maximum": 5000},
+      "source_position": {"type": "string"},
+      "aspiration_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0},
+    },
+    "required": ["pipette_id", "volume", "source_position"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "actual_volume": {"type": "number"},
+      "liquid_level": {"type": "number"},
+      "aspiration_time": {"type": "number"}
+    }
+  },
+  "timeout_s": 45
+}

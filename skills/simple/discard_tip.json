@@ -1,0 +1,25 @@
+{
+  "name": "discard_tip",
+  "description": "Discard used pipette tip to waste container",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "waste_position": {"type": "string"},
+      "force": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
+      "ejection_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0},
+    },
+    "required": ["pipette_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "tip_discarded": {"type": "boolean"},
+      "waste_position": {"type": "string"},
+      "ejection_time": {"type": "number"}
+    }
+  },
+  "timeout_s": 15
+}

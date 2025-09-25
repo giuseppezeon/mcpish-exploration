@@ -1,0 +1,23 @@
+{
+  "name": "release_object",
+  "description": "Release a grasped object from the robot gripper",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "object_id": {"type": "string"},
+      "release_force": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0},
+      "release_speed": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.5}
+    },
+    "required": ["object_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "release_success": {"type": "boolean"},
+      "object_pose": {"type": "object"},
+      "release_time": {"type": "number"}
+    }
+  },
+  "timeout_s": 10
+}

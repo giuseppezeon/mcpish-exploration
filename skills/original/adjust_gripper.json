@@ -1,0 +1,28 @@
+{
+  "name": "adjust_gripper",
+  "description": "Adjust gripper position, force, or configuration",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["open", "close", "set_force", "set_position", "calibrate"]
+      },
+      "force": {"type": "number", "minimum": 0.1, "maximum": 20.0},
+      "position": {"type": "number", "minimum": 0, "maximum": 100},
+      "speed": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.5}
+    },
+    "required": ["action"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "final_position": {"type": "number"},
+      "final_force": {"type": "number"},
+      "gripper_state": {"type": "string"}
+    }
+  },
+  "timeout_s": 10
+}

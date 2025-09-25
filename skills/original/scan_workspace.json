@@ -1,0 +1,27 @@
+{
+  "name": "scan_workspace",
+  "description": "Scan and map the robot workspace to identify objects and obstacles",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "scan_resolution": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
+      "scan_height": {"type": "number", "minimum": 0, "maximum": 50, "default": 10},
+      "object_detection": {"type": "boolean", "default": true},
+      "obstacle_detection": {"type": "boolean", "default": true},
+      "save_map": {"type": "boolean", "default": true}
+    },
+    "required": []
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "objects_detected": {"type": "integer"},
+      "obstacles_detected": {"type": "integer"},
+      "workspace_dimensions": {"type": "object"},
+      "map_file": {"type": "string"}
+    }
+  },
+  "timeout_s": 120
+}

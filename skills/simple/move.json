@@ -1,0 +1,39 @@
+{
+  "name": "move",
+  "description": "Move robot end-effector with specified rotations and translations",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "rotations": {
+        "type": "object",
+        "properties": {
+          "x": {"type": "number"},
+          "y": {"type": "number"},
+          "z": {"type": "number"}
+        },
+        "required": ["x", "y", "z"]
+      },
+      "translations": {
+        "type": "object",
+        "properties": {
+          "x": {"type": "number"},
+          "y": {"type": "number"},
+          "z": {"type": "number"}
+        },
+        "required": ["x", "y", "z"]
+      },
+      "frame": {"type": "string", "default": "base"},
+      "speed": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.5}
+    },
+    "required": ["rotations", "translations"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "final_pose": {"type": "object"},
+      "execution_time": {"type": "number"}
+    }
+  },
+  "timeout_s": 60
+}

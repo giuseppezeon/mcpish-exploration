@@ -1,0 +1,31 @@
+{
+  "name": "measure_volume",
+  "description": "Measure liquid volume in a container using various methods",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "container_id": {"type": "string"},
+      "measurement_method": {
+        "type": "string",
+        "enum": ["gravimetric", "volumetric", "optical", "capacitive"],
+        "default": "gravimetric"
+      },
+      "precision": {"type": "number", "minimum": 0.001, "maximum": 1.0, "default": 0.01},
+      "calibration_standard": {"type": "string"},
+      "temperature_compensation": {"type": "boolean", "default": true}
+    },
+    "required": ["container_id", "measurement_method"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "volume": {"type": "number"},
+      "uncertainty": {"type": "number"},
+      "measurement_time": {"type": "string"},
+      "method_used": {"type": "string"}
+    }
+  },
+  "timeout_s": 60
+}

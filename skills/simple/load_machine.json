@@ -1,0 +1,21 @@
+{
+  "name": "load_machine",
+  "description": "Load a sample into a laboratory machine",
+  "tier": "T2",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "machine_id": {"type": "string"},
+      "sample_id": {"type": "string"}
+    },
+    "required": ["machine_id", "sample_id"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "machine_status": {"type": "string"}
+    }
+  },
+  "timeout_s": 60
+}

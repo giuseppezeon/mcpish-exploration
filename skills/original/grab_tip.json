@@ -1,0 +1,26 @@
+{
+  "name": "grab_tip",
+  "description": "Pick up a new pipette tip from tip rack",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "tip_type": {"type": "string", "enum": ["p10", "p20", "p200", "p1000", "p5000"]},
+      "tip_rack_position": {"type": "string"},
+      "force": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
+      "approach_angle": {"type": "number", "minimum": 0, "maximum": 90, "default": 0}
+    },
+    "required": ["pipette_id", "tip_type"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "tip_position": {"type": "string"},
+      "tip_quality": {"type": "string"},
+      "attachment_force": {"type": "number"}
+    }
+  },
+  "timeout_s": 20
+}

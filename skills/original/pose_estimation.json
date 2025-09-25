@@ -1,0 +1,32 @@
+{
+  "name": "pose_estimation",
+  "description": "Estimate the 6DOF pose of an object using computer vision",
+  "tier": "T0",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "object_id": {"type": "string"},
+      "object_type": {"type": "string"},
+      "reference_frame": {"type": "string", "default": "camera"},
+      "confidence_threshold": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.7},
+      "use_depth": {"type": "boolean", "default": true}
+    },
+    "required": ["object_id", "object_type"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "pose": {
+        "type": "object",
+        "properties": {
+          "position": {"type": "object"},
+          "orientation": {"type": "object"}
+        }
+      },
+      "confidence": {"type": "number"},
+      "covariance": {"type": "object"},
+      "timestamp": {"type": "string"}
+    }
+  },
+  "timeout_s": 10
+}

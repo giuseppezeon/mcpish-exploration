@@ -1,0 +1,32 @@
+{
+  "name": "mix",
+  "description": "Mix liquid in a container using pipette mixing cycles",
+  "tier": "T1",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "pipette_id": {"type": "string"},
+      "container_position": {"type": "string"},
+      "volume": {"type": "number", "minimum": 1, "maximum": 1000},
+      "cycles": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5},
+      "mix_height": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0},
+      "speed": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
+      "pattern": {
+        "type": "string",
+        "enum": ["vertical", "circular", "figure8", "vortex"],
+        "default": "vertical"
+      }
+    },
+    "required": ["pipette_id", "container_position", "volume"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "success": {"type": "boolean"},
+      "cycles_completed": {"type": "integer"},
+      "mixing_time": {"type": "number"},
+      "final_volume": {"type": "number"}
+    }
+  },
+  "timeout_s": 60
+}
