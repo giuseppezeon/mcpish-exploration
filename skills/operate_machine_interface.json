@@ -1,7 +1,7 @@
 {
   "name": "operate_machine_interface",
   "version": "1.0.0",
-  "description": "Operate machine interface (open/close doors, lids, etc.) using machine database waypoints",
+  "description": "Operate machine interface (open/close doors, lids, etc.)",
   "tier": "T2",
   "input_schema": {
     "type": "object",
@@ -9,11 +9,8 @@
       "machine_id": {"type": "string"},
       "operation": {
         "type": "string",
-        "enum": ["open_door", "close_door", "open_lid", "close_lid", "get_status"]
-      },
-      "waypoint": {"type": "string"},
-      "force": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0},
-      "speed": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.5}
+        "enum": ["open_door", "close_door", "open_lid", "close_lid"]
+      }
     },
     "required": ["machine_id", "operation"]
   },
@@ -21,19 +18,15 @@
     "type": "object",
     "properties": {
       "success": {"type": "boolean"},
-      "operation_completed": {"type": "string"},
-      "machine_status": {"type": "string"},
-      "execution_time": {"type": "number"}
+      "operation_completed": {"type": "string"}
     }
   },
-  "preconditions": ["machine_ready", "machine_database_available", "workspace_clear"],
-  "postconditions": ["machine_interface_operated", "operation_logged"],
-  "invariants": ["machine_accessible", "operation_safe"],
-  "timeout_s": 60,
+  "preconditions": ["machine_ready"],
+  "postconditions": ["machine_interface_operated"],
+  "timeout_s": 30,
   "safety": {
     "machine_interlocks": true,
-    "force_limits": true,
-    "collision_detection": true
+    "force_limits": true
   },
   "failure_modes": [
     {
@@ -41,24 +34,16 @@
       "mitigation": "wait_and_retry"
     },
     {
-      "mode": "waypoint_unreachable",
-      "mitigation": "recalculate_path"
-    },
-    {
       "mode": "operation_failed",
-      "mitigation": "retry_with_different_force"
+      "mitigation": "retry_operation"
     }
   ],
   "retry_policy": {
-    "max_attempts": 3,
+    "max_attempts": 2,
     "backoff_factor": 1.5
   },
   "cost_model": {
-    "estimated_duration": 30,
-    "energy_cost": "medium"
-  },
-  "machine_database": {
-    "waypoints": ["approach", "open_door", "close_door", "open_lid", "close_lid", "retreat"],
-    "operations": ["open_door", "close_door", "open_lid", "close_lid", "get_status"]
+    "estimated_duration": 15,
+    "energy_cost": "low"
   }
 }

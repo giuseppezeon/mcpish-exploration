@@ -1,0 +1,4 @@
+# DAG Visualization Server Requirements
+flask==2.3.3
+flask-cors==4.0.0
+d3==0.0.1

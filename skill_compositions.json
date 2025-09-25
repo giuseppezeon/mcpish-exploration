@@ -1,0 +1,562 @@
+{
+  "skill_hierarchies": {
+    "T1_compositions": {
+      "grab_tip": {
+        "description": "Pick up a new pipette tip from tip rack",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "to_tip_rack_position",
+              "rotations": "approach_angle"
+            },
+            "order": 1
+          },
+          {
+            "skill": "adjust_gripper",
+            "parameters": {
+              "action": "close",
+              "force": "grasp_force"
+            },
+            "order": 2
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "tip_attached",
+              "object_id": "pipette_tip"
+            },
+            "order": 3
+          }
+        ]
+      },
+      "discard_tip": {
+        "description": "Discard used pipette tip to waste container",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "to_waste_position",
+              "rotations": "ejection_angle"
+            },
+            "order": 1
+          },
+          {
+            "skill": "adjust_gripper",
+            "parameters": {
+              "action": "open",
+              "force": "ejection_force"
+            },
+            "order": 2
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "tip_discarded",
+              "object_id": "waste_container"
+            },
+            "order": 3
+          }
+        ]
+      },
+      "aspirate": {
+        "description": "Aspirate liquid from a source container using pipette",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "to_source_position",
+              "rotations": "approach_angle"
+            },
+            "order": 1
+          },
+          {
+            "skill": "pose_estimation",
+            "parameters": {
+              "object_id": "liquid_surface",
+              "object_type": "liquid"
+            },
+            "order": 2
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "to_aspiration_depth",
+              "rotations": "vertical"
+            },
+            "order": 3
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "liquid_aspirated",
+              "object_id": "pipette_tip"
+            },
+            "order": 4
+          }
+        ]
+      },
+      "dispense": {
+        "description": "Dispense liquid from pipette to target container",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "to_target_position",
+              "rotations": "approach_angle"
+            },
+            "order": 1
+          },
+          {
+            "skill": "pose_estimation",
+            "parameters": {
+              "object_id": "target_container",
+              "object_type": "container"
+            },
+            "order": 2
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "to_dispense_height",
+              "rotations": "vertical"
+            },
+            "order": 3
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "liquid_dispensed",
+              "object_id": "target_container"
+            },
+            "order": 4
+          }
+        ]
+      },
+      "mix": {
+        "description": "Mix liquid in a container using pipette mixing cycles",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "to_container_position",
+              "rotations": "approach_angle"
+            },
+            "order": 1
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "mixing_pattern",
+              "rotations": "mixing_orientation"
+            },
+            "order": 2,
+            "repeat": "mix_cycles"
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "liquid_mixed",
+              "object_id": "container"
+            },
+            "order": 3
+          }
+        ]
+      },
+      "scan_workspace": {
+        "description": "Scan and map the robot workspace to identify objects and obstacles",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "scan_positions",
+              "rotations": "scan_angles"
+            },
+            "order": 1,
+            "repeat": "scan_grid"
+          },
+          {
+            "skill": "pose_estimation",
+            "parameters": {
+              "object_id": "all_objects",
+              "object_type": "any"
+            },
+            "order": 2
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "workspace_mapped",
+              "object_id": "workspace"
+            },
+            "order": 3
+          }
+        ]
+      }
+    },
+    "T2_compositions": {
+      "load_machine": {
+        "description": "Load a sample or plate into a laboratory machine using machine database waypoints",
+        "composed_of": [
+          {
+            "skill": "scan_workspace",
+            "parameters": {
+              "scan_resolution": "high"
+            },
+            "order": 1
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "machine_approach_waypoint",
+              "rotations": "approach_orientation"
+            },
+            "order": 2
+          },
+          {
+            "skill": "operate_machine_interface",
+            "parameters": {
+              "machine_id": "from_input",
+              "operation": "open_door"
+            },
+            "order": 3
+          },
+          {
+            "skill": "grab_object",
+            "parameters": {
+              "object_id": "sample_id",
+              "grasp_pose": "sample_pose"
+            },
+            "order": 4
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "machine_load_waypoint",
+              "rotations": "load_orientation"
+            },
+            "order": 5
+          },
+          {
+            "skill": "adjust_gripper",
+            "parameters": {
+              "action": "open"
+            },
+            "order": 6
+          },
+          {
+            "skill": "operate_machine_interface",
+            "parameters": {
+              "machine_id": "from_input",
+              "operation": "close_door"
+            },
+            "order": 7
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "machine_retreat_waypoint",
+              "rotations": "retreat_orientation"
+            },
+            "order": 8
+          }
+        ]
+      },
+      "operate_machine_interface": {
+        "description": "Operate machine interface (open/close doors, lids, etc.) using machine database waypoints",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "machine_waypoint",
+              "rotations": "operation_angle"
+            },
+            "order": 1
+          },
+          {
+            "skill": "grab_object",
+            "parameters": {
+              "object_id": "machine_handle",
+              "grasp_pose": "handle_pose"
+            },
+            "order": 2
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "operation_motion",
+              "rotations": "operation_rotation"
+            },
+            "order": 3
+          },
+          {
+            "skill": "adjust_gripper",
+            "parameters": {
+              "action": "open"
+            },
+            "order": 4
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "machine_interface_operated",
+              "object_id": "machine_id"
+            },
+            "order": 5
+          }
+        ]
+      },
+      "execute_machine_operation": {
+        "description": "Execute machine operations (start cycles, set parameters, etc.) using machine database commands",
+        "composed_of": [
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "machine_ready",
+              "object_id": "machine_id"
+            },
+            "order": 1
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "machine_control_panel",
+              "rotations": "control_angle"
+            },
+            "order": 2
+          },
+          {
+            "skill": "grab_object",
+            "parameters": {
+              "object_id": "control_button",
+              "grasp_pose": "button_pose"
+            },
+            "order": 3
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "button_press_motion",
+              "rotations": "press_angle"
+            },
+            "order": 4
+          },
+          {
+            "skill": "adjust_gripper",
+            "parameters": {
+              "action": "open"
+            },
+            "order": 5
+          },
+          {
+            "skill": "vlm_assert",
+            "parameters": {
+              "assertion": "operation_started",
+              "object_id": "machine_id"
+            },
+            "order": 6
+          }
+        ]
+      },
+      "unload_machine": {
+        "description": "Unload samples from a laboratory machine using machine database waypoints",
+        "composed_of": [
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "machine_approach_waypoint",
+              "rotations": "approach_orientation"
+            },
+            "order": 1
+          },
+          {
+            "skill": "operate_machine_interface",
+            "parameters": {
+              "machine_id": "from_input",
+              "operation": "open_door"
+            },
+            "order": 2
+          },
+          {
+            "skill": "grab_object",
+            "parameters": {
+              "object_id": "sample_id",
+              "grasp_pose": "sample_pose"
+            },
+            "order": 3
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "machine_retreat_waypoint",
+              "rotations": "retreat_orientation"
+            },
+            "order": 4
+          },
+          {
+            "skill": "move",
+            "parameters": {
+              "translations": "destination_position",
+              "rotations": "destination_orientation"
+            },
+            "order": 5
+          },
+          {
+            "skill": "adjust_gripper",
+            "parameters": {
+              "action": "open"
+            },
+            "order": 6
+          },
+          {
+            "skill": "operate_machine_interface",
+            "parameters": {
+              "machine_id": "from_input",
+              "operation": "close_door"
+            },
+            "order": 7
+          }
+        ]
+      },
+      "transfer_liquid": {
+        "description": "Transfer liquid from source to destination with volume control",
+        "composed_of": [
+          {
+            "skill": "grab_tip",
+            "parameters": {
+              "pipette_id": "from_input",
+              "tip_type": "from_input"
+            },
+            "order": 1
+          },
+          {
+            "skill": "aspirate",
+            "parameters": {
+              "pipette_id": "from_input",
+              "volume": "from_input",
+              "source_position": "from_input"
+            },
+            "order": 2
+          },
+          {
+            "skill": "dispense",
+            "parameters": {
+              "pipette_id": "from_input",
+              "volume": "from_input",
+              "target_position": "from_input"
+            },
+            "order": 3
+          },
+          {
+            "skill": "discard_tip",
+            "parameters": {
+              "pipette_id": "from_input"
+            },
+            "order": 4
+          }
+        ]
+      },
+      "plate_processing": {
+        "description": "Process a microplate with multiple liquid handling operations",
+        "composed_of": [
+          {
+            "skill": "scan_workspace",
+            "parameters": {
+              "object_detection": true
+            },
+            "order": 1
+          },
+          {
+            "skill": "grab_tip",
+            "parameters": {
+              "pipette_id": "from_input",
+              "tip_type": "from_input"
+            },
+            "order": 2
+          },
+          {
+            "skill": "aspirate",
+            "parameters": {
+              "pipette_id": "from_input",
+              "volume": "from_operation",
+              "source_position": "from_operation"
+            },
+            "order": 3,
+            "repeat": "for_each_operation"
+          },
+          {
+            "skill": "dispense",
+            "parameters": {
+              "pipette_id": "from_input",
+              "volume": "from_operation",
+              "target_position": "from_operation"
+            },
+            "order": 4,
+            "repeat": "for_each_operation"
+          },
+          {
+            "skill": "mix",
+            "parameters": {
+              "pipette_id": "from_input",
+              "volume": "from_operation",
+              "container_position": "from_operation"
+            },
+            "order": 5,
+            "repeat": "for_each_operation"
+          },
+          {
+            "skill": "discard_tip",
+            "parameters": {
+              "pipette_id": "from_input"
+            },
+            "order": 6
+          }
+        ]
+      }
+    }
+  },
+  "execution_trees": {
+    "example_pcr_workflow": {
+      "description": "Complete PCR analysis workflow showing full skill decomposition",
+      "workflow": [
+        {
+          "skill": "scan_workspace",
+          "tier": "T1",
+          "decomposition": [
+            "move(to_scan_positions)",
+            "pose_estimation(all_objects)",
+            "vlm_assert(workspace_mapped)"
+          ]
+        },
+        {
+          "skill": "load_machine",
+          "tier": "T2",
+          "parameters": {"machine_id": "thermocycler_1"},
+          "decomposition": [
+            "scan_workspace(high_resolution)",
+            "move(machine_approach_waypoint)",
+            "operate_machine_interface(open_door)",
+            "grab_object(sample)",
+            "move(machine_load_waypoint)",
+            "adjust_gripper(open)",
+            "operate_machine_interface(close_door)",
+            "move(machine_retreat_waypoint)"
+          ]
+        },
+        {
+          "skill": "execute_machine_operation",
+          "tier": "T2",
+          "parameters": {"machine_id": "thermocycler_1", "operation": "start_protocol"},
+          "decomposition": [
+            "vlm_assert(machine_ready)",
+            "move(machine_control_panel)",
+            "grab_object(control_button)",
+            "move(button_press_motion)",
+            "adjust_gripper(open)",
+            "vlm_assert(operation_started)"
+          ]
+        }
+      ]
+    }
+  }
+}

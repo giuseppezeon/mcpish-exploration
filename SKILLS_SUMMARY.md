@@ -34,23 +34,14 @@ This document provides an overview of all the robot skills created for the agent
 
 ## Tier 2 (Procedural Skills) - High-level workflows
 
-### Generic Machine Operations
-- **load_machine** - Load a sample or plate into a laboratory machine using machine database waypoints
-- **operate_machine_interface** - Operate machine interface (open/close doors, lids, etc.) using machine database waypoints
-- **execute_machine_operation** - Execute machine operations (start cycles, set parameters, etc.) using machine database commands
-- **unload_machine** - Unload samples from a laboratory machine using machine database waypoints
+### Machine Operations
+- **load_machine** - Load a sample into a laboratory machine
+- **operate_machine_interface** - Operate machine interface (open/close doors, lids, etc.)
+- **unload_machine** - Unload samples from a laboratory machine
 
 ### Liquid Processing
 - **transfer_liquid** - Transfer liquid from source to destination with volume control
 - **plate_processing** - Process a microplate with multiple liquid handling operations
-
-### Quality & Calibration
-- **calibrate_instrument** - Calibrate laboratory instruments (pipettes, scales, etc.)
-- **quality_control** - Perform quality control checks on samples or processes
-
-### Maintenance & Safety
-- **clean_workspace** - Clean and sanitize the robot workspace
-- **sterilize_equipment** - Sterilize laboratory equipment using appropriate methods
 
 ## Skill Composition Examples
 
@@ -65,28 +56,14 @@ This document provides an overview of all the robot skills created for the agent
 7. adjust_gripper (T0) - release pipette
 ```
 
-### Complex Workflow: PCR Analysis
+### Complex Workflow: Sample Processing
 ```
 1. scan_workspace (T1)
-2. load_machine (T2, machine_id="thermocycler_1") - load samples into thermocycler
-3. operate_machine_interface (T2, machine_id="thermocycler_1", operation="close_lid")
-4. execute_machine_operation (T2, machine_id="thermocycler_1", operation="start_protocol", parameters={"protocol_name": "pcr_standard", "cycles": 30})
-5. unload_machine (T2, machine_id="thermocycler_1")
-6. load_machine (T2, machine_id="centrifuge_1") - transfer to centrifuge
-7. execute_machine_operation (T2, machine_id="centrifuge_1", operation="start_cycle", parameters={"rpm": 3000, "duration": 300})
-8. unload_machine (T2, machine_id="centrifuge_1")
-9. load_machine (T2, machine_id="spectrophotometer_1")
-10. execute_machine_operation (T2, machine_id="spectrophotometer_1", operation="start_reading", parameters={"wavelengths": [260, 280], "measurement_type": "absorbance"})
-11. quality_control (T2)
-```
-
-### Maintenance Workflow
-```
-1. emergency_stop (T0) - if needed
-2. clean_workspace (T2)
-3. sterilize_equipment (T2)
-4. calibrate_instrument (T2)
-5. quality_control (T2)
+2. load_machine (T2, machine_id="centrifuge_1", sample_id="sample_001")
+3. operate_machine_interface (T2, machine_id="centrifuge_1", operation="close_door")
+4. unload_machine (T2, machine_id="centrifuge_1", sample_id="sample_001")
+5. transfer_liquid (T2, source_position="A1", destination_position="B1", volume=100.0, pipette_id="pipette_1")
+6. plate_processing (T2, plate_id="plate_001", operations=[...])
 ```
 
 ## Key Features of the Skill System
@@ -146,14 +123,14 @@ All machine operations now use the generic pattern:
 ### Skill Count by Tier
 - **Tier 0 (Atomic)**: 7 skills - Basic robot movements, vision, and safety
 - **Tier 1 (Reusable Patterns)**: 6 skills - Liquid handling, workspace management, measurement
-- **Tier 2 (Procedural)**: 10 skills - Machine operations, liquid processing, quality control, maintenance
+- **Tier 2 (Procedural)**: 5 skills - Machine operations and liquid processing
 
-**Total: 23 skills** organized across 3 tiers for maximum flexibility and composition.
+**Total: 18 skills** organized across 3 tiers for maximum flexibility and composition.
 
 ### Recent Updates
 1. **Split `change_tip`** into `grab_tip` and `discard_tip` for better granularity
-2. **Refactored machine operations** to use generic `machine_id` parameter with centralized database
-3. **Removed machine-specific skills** in favor of generic operations
-4. **Added machine database** with waypoints, operations, and safety limits
+2. **Simplified machine operations** to focus on core functionality
+3. **Removed overly generic skills** (calibrate_instrument, quality_control, clean_workspace, sterilize_equipment)
+4. **Streamlined skill registry** to 18 focused skills across 3 tiers
 
 This skill registry provides a comprehensive foundation for building complex laboratory automation workflows while maintaining safety, reliability, and flexibility.

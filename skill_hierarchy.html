@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Skill Hierarchy Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .tier-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+        .tier-0 {
+            background-color: #e8f5e8;
+            border-left-color: #27ae60;
+        }
+        .tier-1 {
+            background-color: #e3f2fd;
+            border-left-color: #2196f3;
+        }
+        .tier-2 {
+            background-color: #fff3e0;
+            border-left-color: #ff9800;
+        }
+        .skill-card {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .skill-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .skill-description {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .composition {
+            margin-left: 20px;
+        }
+        .composition-step {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 4px;
+            border-left: 3px solid #007bff;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .mermaid {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .stat-item {
+            display: inline-block;
+            margin: 10px 20px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Robot Skill Hierarchy Visualizer</h1>
+
+        <div class="controls">
+            <button onclick="showHierarchy()">Show Hierarchy</button>
+            <button onclick="showDiagram()">Show Diagram</button>
+            <button onclick="showStats()">Show Statistics</button>
+        </div>
+
+        <div id="content">
+            <div class="tier-section tier-0">
+                <h2>🔧 Tier 0 - Atomic Skills</h2>
+                <p>Context-free, atomic robot actions that cannot be further decomposed.</p>
+
+                <div class="skill-card">
+                    <div class="skill-name">move</div>
+                    <div class="skill-description">Move robot end-effector with specified rotations and translations</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-name">grab_object</div>
+                    <div class="skill-description">Grasp an object with the robot gripper</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-name">adjust_gripper</div>
+                    <div class="skill-description">Adjust gripper position, force, or configuration</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-name">vlm_assert</div>
+                    <div class="skill-description">Use Vision Language Model to verify scene conditions</div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-name">pose_estimation</div>
+                    <div class="skill-description">Estimate the 6DOF pose of an object using computer vision</div>
+                </div>
+            </div>
+
+            <div class="tier-section tier-1">
+                <h2>🔧 Tier 1 - Reusable Patterns</h2>
+                <p>Composed of Tier 0 skills, representing reusable robotic patterns.</p>
+
+                <div class="skill-card">
+                    <div class="skill-name">grab_tip</div>
+                    <div class="skill-description">Pick up a new pipette tip from tip rack</div>
+                    <div class="composition">
+                        <div class="composition-step">1. move(to_tip_rack_position)</div>
+                        <div class="composition-step">2. adjust_gripper(action="close")</div>
+                        <div class="composition-step">3. vlm_assert(tip_attached)</div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-name">aspirate</div>
+                    <div class="skill-description">Aspirate liquid from a source container using pipette</div>
+                    <div class="composition">
+                        <div class="composition-step">1. move(to_source_position)</div>
+                        <div class="composition-step">2. pose_estimation(liquid_surface)</div>
+                        <div class="composition-step">3. move(to_aspiration_depth)</div>
+                        <div class="composition-step">4. vlm_assert(liquid_aspirated)</div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-name">dispense</div>
+                    <div class="skill-description">Dispense liquid from pipette to target container</div>
+                    <div class="composition">
+                        <div class="composition-step">1. move(to_target_position)</div>
+                        <div class="composition-step">2. pose_estimation(target_container)</div>
+                        <div class="composition-step">3. move(to_dispense_height)</div>
+                        <div class="composition-step">4. vlm_assert(liquid_dispensed)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tier-section tier-2">
+                <h2>🏭 Tier 2 - Procedural Skills</h2>
+                <p>Composed of Tier 1 and Tier 0 skills, representing high-level workflows.</p>
+
+                <div class="skill-card">
+                    <div class="skill-name">load_machine</div>
+                    <div class="skill-description">Load a sample into a laboratory machine using machine database waypoints</div>
+                    <div class="composition">
+                        <div class="composition-step">1. scan_workspace(high_resolution)</div>
+                        <div class="composition-step">2. move(machine_approach_waypoint)</div>
+                        <div class="composition-step">3. operate_machine_interface(open_door)</div>
+                        <div class="composition-step">4. grab_object(sample)</div>
+                        <div class="composition-step">5. move(machine_load_waypoint)</div>
+                        <div class="composition-step">6. adjust_gripper(open)</div>
+                        <div class="composition-step">7. operate_machine_interface(close_door)</div>
+                        <div class="composition-step">8. move(machine_retreat_waypoint)</div>
+                    </div>
+                </div>
+
+                <div class="skill-card">
+                    <div class="skill-name">transfer_liquid</div>
+                    <div class="skill-description">Transfer liquid from source to destination with volume control</div>
+                    <div class="composition">
+                        <div class="composition-step">1. grab_tip(pipette_id, tip_type)</div>
+                        <div class="composition-step">2. aspirate(pipette_id, volume, source_position)</div>
+                        <div class="composition-step">3. dispense(pipette_id, volume, target_position)</div>
+                        <div class="composition-step">4. discard_tip(pipette_id)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <h3>📊 Skill Statistics</h3>
+            <div class="stat-item">
+                <div class="stat-number">7</div>
+                <div class="stat-label">Tier 0 Skills</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">6</div>
+                <div class="stat-label">Tier 1 Skills</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">10</div>
+                <div class="stat-label">Tier 2 Skills</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">23</div>
+                <div class="stat-label">Total Skills</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+
+        function showHierarchy() {
+            document.getElementById('content').innerHTML = `
+                <div class="tier-section tier-0">
+                    <h2>🔧 Tier 0 - Atomic Skills</h2>
+                    <p>Context-free, atomic robot actions that cannot be further decomposed.</p>
+                    <div class="skill-card">
+                        <div class="skill-name">move</div>
+                        <div class="skill-description">Move robot end-effector with specified rotations and translations</div>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-name">grab_object</div>
+                        <div class="skill-description">Grasp an object with the robot gripper</div>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-name">adjust_gripper</div>
+                        <div class="skill-description">Adjust gripper position, force, or configuration</div>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-name">vlm_assert</div>
+                        <div class="skill-description">Use Vision Language Model to verify scene conditions</div>
+                    </div>
+                    <div class="skill-card">
+                        <div class="skill-name">pose_estimation</div>
+                        <div class="skill-description">Estimate the 6DOF pose of an object using computer vision</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showDiagram() {
+            document.getElementById('content').innerHTML = `
+                <div class="mermaid">
+                    graph TD
+                        move[move] --> grab_tip[grab_tip]
+                        adjust_gripper[adjust_gripper] --> grab_tip
+                        vlm_assert[vlm_assert] --> grab_tip
+
+                        move --> aspirate[aspirate]
+                        pose_estimation[pose_estimation] --> aspirate
+                        vlm_assert --> aspirate
+
+                        move --> dispense[dispense]
+                        pose_estimation --> dispense
+                        vlm_assert --> dispense
+
+                        grab_tip --> transfer_liquid[transfer_liquid]
+                        aspirate --> transfer_liquid
+                        dispense --> transfer_liquid
+                        discard_tip[discard_tip] --> transfer_liquid
+
+                        scan_workspace[scan_workspace] --> load_machine[load_machine]
+                        move --> load_machine
+                        grab_object[grab_object] --> load_machine
+                        adjust_gripper --> load_machine
+                </div>
+            `;
+            mermaid.init();
+        }
+
+        function showStats() {
+            document.getElementById('content').innerHTML = `
+                <div class="stats">
+                    <h2>📊 Detailed Statistics</h2>
+                    <h3>Skill Usage Count</h3>
+                    <p><strong>Most Used T0 Skills:</strong></p>
+                    <ul>
+                        <li>move: 15 times</li>
+                        <li>vlm_assert: 8 times</li>
+                        <li>adjust_gripper: 6 times</li>
+                        <li>grab_object: 4 times</li>
+                        <li>pose_estimation: 3 times</li>
+                    </ul>
+
+                    <p><strong>Most Used T1 Skills:</strong></p>
+                    <ul>
+                        <li>grab_tip: 3 times</li>
+                        <li>aspirate: 2 times</li>
+                        <li>dispense: 2 times</li>
+                        <li>discard_tip: 2 times</li>
+                    </ul>
+
+                    <h3>Composition Depth</h3>
+                    <ul>
+                        <li>Average T1 skill depth: 3.2 steps</li>
+                        <li>Average T2 skill depth: 6.8 steps</li>
+                        <li>Maximum composition depth: 8 steps</li>
+                    </ul>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
