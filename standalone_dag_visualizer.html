@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Skills DAG Visualizer - Standalone</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        select, input, button {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .main-content {
+            display: flex;
+            height: 75vh;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .skill-list {
+            margin-bottom: 30px;
+        }
+
+        .skill-list h3 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .skill-item {
+            padding: 8px 12px;
+            margin: 5px 0;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .skill-item:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .skill-item.selected {
+            background: #2196f3;
+            color: white;
+            border-color: #1976d2;
+        }
+
+        .skill-item.tier0 {
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .skill-item.tier1 {
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .skill-item.tier2 {
+            border-left: 4px solid #45b7d1;
+        }
+
+        .skill-badge {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .skill-details {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .skill-details h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+
+        .skill-details p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .subskills-list {
+            margin-top: 10px;
+        }
+
+        .subskill-item {
+            padding: 4px 8px;
+            margin: 2px 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .visualization {
+            flex: 1;
+            position: relative;
+            background: #fafafa;
+        }
+
+        .svg-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .node {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .node:hover {
+            stroke-width: 3px;
+        }
+
+        .node.tier0 {
+            fill: #ff6b6b;
+        }
+
+        .node.tier1 {
+            fill: #4ecdc4;
+        }
+
+        .node.tier2 {
+            fill: #45b7d1;
+        }
+
+        .node.selected {
+            stroke: #ffd700;
+            stroke-width: 3px;
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+            stroke-width: 2px;
+        }
+
+        .link:hover {
+            stroke-opacity: 1;
+            stroke-width: 3px;
+        }
+
+        .node-label {
+            font-size: 12px;
+            font-weight: 500;
+            text-anchor: middle;
+            pointer-events: none;
+            fill: white;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+        }
+
+        .stats {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 12px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #6c757d;
+        }
+
+        .execution-path {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e8f4fd;
+            border-radius: 6px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .execution-path h5 {
+            margin: 0 0 8px 0;
+            color: #1976d2;
+            font-size: 13px;
+        }
+
+        .execution-step {
+            padding: 4px 8px;
+            margin: 2px 0;
+            background: white;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #495057;
+        }
+
+        .workflow-builder {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .workflow-builder h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+
+        .workflow-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .workflow-skill {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .workflow-skill:hover {
+            background: #bbdefb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Robot Skills DAG Visualizer</h1>
+            <p>Interactive visualization of robot skill hierarchy and composition</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="tierFilter">Filter by Tier:</label>
+                <select id="tierFilter">
+                    <option value="all">All Tiers</option>
+                    <option value="T0">T0 - Atomic</option>
+                    <option value="T1">T1 - Pattern</option>
+                    <option value="T2">T2 - Procedural</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="layoutType">Layout:</label>
+                <select id="layoutType">
+                    <option value="hierarchical">Hierarchical</option>
+                    <option value="force">Force-Directed</option>
+                    <option value="circular">Circular</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <input type="text" id="searchInput" placeholder="Search skills..." style="width: 200px;">
+            </div>
+
+            <div class="control-group">
+                <button id="resetView">Reset View</button>
+                <button id="exportData">Export Data</button>
+                <button id="refreshData">Refresh</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="skill-list">
+                    <h3>🎯 Tier 0 - Atomic Skills</h3>
+                    <div id="tier0Skills"></div>
+                </div>
+
+                <div class="skill-list">
+                    <h3>🔧 Tier 1 - Pattern Skills</h3>
+                    <div id="tier1Skills"></div>
+                </div>
+
+                <div class="skill-list">
+                    <h3>🏭 Tier 2 - Procedural Skills</h3>
+                    <div id="tier2Skills"></div>
+                </div>
+
+                <div class="skill-details" id="skillDetails" style="display: none;">
+                    <h4>Skill Details</h4>
+                    <p id="skillName"></p>
+                    <p id="skillTier"></p>
+                    <p id="skillComposition"></p>
+                    <div class="subskills-list" id="subskillsList"></div>
+                    <div class="execution-path" id="executionPath" style="display: none;">
+                        <h5>Execution Path</h5>
+                        <div id="executionSteps"></div>
+                    </div>
+                </div>
+
+                <div class="workflow-builder">
+                    <h4>🔗 Workflow Builder</h4>
+                    <p>Click skills to add to workflow</p>
+                    <div class="workflow-skills" id="workflowSkills"></div>
+                    <button id="createWorkflow" style="margin-top: 10px;">Create Workflow</button>
+                </div>
+            </div>
+
+            <div class="visualization">
+                <div class="loading" id="loading">Loading skill composition data...</div>
+                <svg class="svg-container" id="dagSvg"></svg>
+                <div class="tooltip" id="tooltip"></div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff6b6b;"></div>
+                        <span>T0 - Atomic Skills</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4ecdc4;"></div>
+                        <span>T1 - Pattern Skills</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #45b7d1;"></div>
+                        <span>T2 - Procedural Skills</span>
+                    </div>
+                </div>
+                <div class="stats" id="stats"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class StandaloneSkillDAGVisualizer {
+            constructor() {
+                this.data = null;
+                this.selectedSkill = null;
+                this.simulation = null;
+                this.svg = null;
+                this.width = 0;
+                this.height = 0;
+                this.workflowSkills = new Set();
+
+                this.init();
+            }
+
+            async init() {
+                this.loadSkillData();
+                this.setupEventListeners();
+                this.createVisualization();
+                this.populateSidebar();
+            }
+
+            loadSkillData() {
+                // Complete skill data with all compositions
+                this.data = {
+                    nodes: [
+                        // T0 Skills (Atomic)
+                        {id: "move", tier: "T0", label: "move", type: "skill"},
+                        {id: "grab_object", tier: "T0", label: "grab_object", type: "skill"},
+                        {id: "align_objects", tier: "T0", label: "align_objects", type: "skill"},
+                        {id: "adjust_gripper", tier: "T0", label: "adjust_gripper", type: "skill"},
+                        {id: "vlm_assert", tier: "T0", label: "vlm_assert", type: "skill"},
+                        {id: "pose_estimation", tier: "T0", label: "pose_estimation", type: "skill"},
+                        {id: "emergency_stop", tier: "T0", label: "emergency_stop", type: "skill"},
+
+                        // T1 Skills (Pattern)
+                        {id: "grab_tip", tier: "T1", label: "grab_tip", type: "skill"},
+                        {id: "discard_tip", tier: "T1", label: "discard_tip", type: "skill"},
+                        {id: "aspirate", tier: "T1", label: "aspirate", type: "skill"},
+                        {id: "dispense", tier: "T1", label: "dispense", type: "skill"},
+                        {id: "mix", tier: "T1", label: "mix", type: "skill"},
+                        {id: "scan_workspace", tier: "T1", label: "scan_workspace", type: "skill"},
+                        {id: "measure_volume", tier: "T1", label: "measure_volume", type: "skill"},
+
+                        // T2 Skills (Procedural)
+                        {id: "load_machine", tier: "T2", label: "load_machine", type: "skill"},
+                        {id: "operate_machine_interface", tier: "T2", label: "operate_machine_interface", type: "skill"},
+                        {id: "unload_machine", tier: "T2", label: "unload_machine", type: "skill"},
+                        {id: "transfer_liquid", tier: "T2", label: "transfer_liquid", type: "skill"},
+                        {id: "plate_processing", tier: "T2", label: "plate_processing", type: "skill"}
+                    ],
+                    edges: [
+                        // T1 compositions
+                        {source: "grab_tip", target: "move", type: "composition"},
+                        {source: "grab_tip", target: "adjust_gripper", type: "composition"},
+                        {source: "grab_tip", target: "vlm_assert", type: "composition"},
+
+                        {source: "discard_tip", target: "move", type: "composition"},
+                        {source: "discard_tip", target: "adjust_gripper", type: "composition"},
+                        {source: "discard_tip", target: "vlm_assert", type: "composition"},
+
+                        {source: "aspirate", target: "move", type: "composition"},
+                        {source: "aspirate", target: "pose_estimation", type: "composition"},
+                        {source: "aspirate", target: "vlm_assert", type: "composition"},
+
+                        {source: "dispense", target: "move", type: "composition"},
+                        {source: "dispense", target: "pose_estimation", type: "composition"},
+                        {source: "dispense", target: "vlm_assert", type: "composition"},
+
+                        {source: "mix", target: "move", type: "composition"},
+                        {source: "mix", target: "vlm_assert", type: "composition"},
+
+                        {source: "scan_workspace", target: "move", type: "composition"},
+                        {source: "scan_workspace", target: "pose_estimation", type: "composition"},
+                        {source: "scan_workspace", target: "vlm_assert", type: "composition"},
+
+                        {source: "measure_volume", target: "pose_estimation", type: "composition"},
+                        {source: "measure_volume", target: "vlm_assert", type: "composition"},
+
+                        // T2 compositions
+                        {source: "load_machine", target: "move", type: "composition"},
+                        {source: "load_machine", target: "grab_object", type: "composition"},
+                        {source: "load_machine", target: "adjust_gripper", type: "composition"},
+
+                        {source: "operate_machine_interface", target: "move", type: "composition"},
+                        {source: "operate_machine_interface", target: "grab_object", type: "composition"},
+                        {source: "operate_machine_interface", target: "adjust_gripper", type: "composition"},
+
+                        {source: "unload_machine", target: "move", type: "composition"},
+                        {source: "unload_machine", target: "grab_object", type: "composition"},
+                        {source: "unload_machine", target: "adjust_gripper", type: "composition"},
+
+                        {source: "transfer_liquid", target: "grab_tip", type: "composition"},
+                        {source: "transfer_liquid", target: "aspirate", type: "composition"},
+                        {source: "transfer_liquid", target: "dispense", type: "composition"},
+                        {source: "transfer_liquid", target: "discard_tip", type: "composition"},
+
+                        {source: "plate_processing", target: "scan_workspace", type: "composition"},
+                        {source: "plate_processing", target: "grab_tip", type: "composition"},
+                        {source: "plate_processing", target: "aspirate", type: "composition"},
+                        {source: "plate_processing", target: "dispense", type: "composition"},
+                        {source: "plate_processing", target: "mix", type: "composition"},
+                        {source: "plate_processing", target: "discard_tip", type: "composition"}
+                    ],
+                    tiers: {
+                        "T0": {color: "#ff6b6b", label: "Atomic Skills"},
+                        "T1": {color: "#4ecdc4", label: "Pattern Skills"},
+                        "T2": {color: "#45b7d1", label: "Procedural Skills"}
+                    }
+                };
+
+                console.log('✅ Skill data loaded:', this.data);
+            }
+
+            setupEventListeners() {
+                document.getElementById('tierFilter').addEventListener('change', (e) => {
+                    this.filterByTier(e.target.value);
+                });
+
+                document.getElementById('layoutType').addEventListener('change', (e) => {
+                    this.changeLayout(e.target.value);
+                });
+
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.searchSkills(e.target.value);
+                });
+
+                document.getElementById('resetView').addEventListener('click', () => {
+                    this.resetView();
+                });
+
+                document.getElementById('exportData').addEventListener('click', () => {
+                    this.exportData();
+                });
+
+                document.getElementById('refreshData').addEventListener('click', () => {
+                    this.refreshData();
+                });
+
+                document.getElementById('createWorkflow').addEventListener('click', () => {
+                    this.createWorkflow();
+                });
+            }
+
+            createVisualization() {
+                const container = document.querySelector('.visualization');
+                this.width = container.clientWidth;
+                this.height = container.clientHeight;
+
+                this.svg = d3.select('#dagSvg')
+                    .attr('width', this.width)
+                    .attr('height', this.height);
+
+                this.renderGraph();
+                this.updateStats();
+            }
+
+            renderGraph() {
+                // Clear existing content
+                this.svg.selectAll('*').remove();
+
+                // Create container for zoom/pan
+                const container = this.svg.append('g');
+
+                // Add zoom behavior
+                const zoom = d3.zoom()
+                    .scaleExtent([0.1, 4])
+                    .on('zoom', (event) => {
+                        container.attr('transform', event.transform);
+                    });
+
+                this.svg.call(zoom);
+
+                // Create force simulation
+                this.simulation = d3.forceSimulation(this.data.nodes)
+                    .force('link', d3.forceLink(this.data.edges).id(d => d.id).distance(100))
+                    .force('charge', d3.forceManyBody().strength(-300))
+                    .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+                    .force('collision', d3.forceCollide().radius(30));
+
+                // Create links
+                const link = container.append('g')
+                    .selectAll('line')
+                    .data(this.data.edges)
+                    .enter().append('line')
+                    .attr('class', 'link')
+                    .attr('stroke', '#999')
+                    .attr('stroke-opacity', 0.6)
+                    .attr('stroke-width', 2);
+
+                // Create nodes
+                const node = container.append('g')
+                    .selectAll('circle')
+                    .data(this.data.nodes)
+                    .enter().append('circle')
+                    .attr('class', d => `node tier${d.tier.slice(1)}`)
+                    .attr('r', 20)
+                    .attr('fill', d => this.data.tiers[d.tier].color)
+                    .attr('stroke', '#fff')
+                    .attr('stroke-width', 2)
+                    .style('cursor', 'pointer')
+                    .call(d3.drag()
+                        .on('start', this.dragstarted.bind(this))
+                        .on('drag', this.dragged.bind(this))
+                        .on('end', this.dragended.bind(this)))
+                    .on('click', this.nodeClicked.bind(this))
+                    .on('mouseover', this.nodeMouseover.bind(this))
+                    .on('mouseout', this.nodeMouseout.bind(this));
+
+                // Add labels
+                const label = container.append('g')
+                    .selectAll('text')
+                    .data(this.data.nodes)
+                    .enter().append('text')
+                    .attr('class', 'node-label')
+                    .attr('dy', 5)
+                    .text(d => d.label);
+
+                // Update positions on simulation tick
+                this.simulation.on('tick', () => {
+                    link
+                        .attr('x1', d => d.source.x)
+                        .attr('y1', d => d.source.y)
+                        .attr('x2', d => d.target.x)
+                        .attr('y2', d => d.target.y);
+
+                    node
+                        .attr('cx', d => d.x)
+                        .attr('cy', d => d.y);
+
+                    label
+                        .attr('x', d => d.x)
+                        .attr('y', d => d.y);
+                });
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+            }
+
+            dragstarted(event, d) {
+                if (!event.active) this.simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            dragended(event, d) {
+                if (!event.active) this.simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+
+            nodeClicked(event, d) {
+                this.selectedSkill = d;
+                this.updateSkillDetails(d);
+                this.highlightNode(d);
+            }
+
+            updateSkillDetails(skill) {
+                // Find subskills
+                const subskills = this.data.edges
+                    .filter(edge => edge.source === skill.id)
+                    .map(edge => edge.target);
+
+                // Find execution path (simplified)
+                const executionPath = this.getExecutionPath(skill.id);
+
+                const name = document.getElementById('skillName');
+                const tier = document.getElementById('skillTier');
+                const composition = document.getElementById('skillComposition');
+                const subskillsList = document.getElementById('subskillsList');
+                const executionPathDiv = document.getElementById('executionPath');
+                const executionSteps = document.getElementById('executionSteps');
+
+                name.textContent = `Name: ${skill.label}`;
+                tier.textContent = `Tier: ${skill.tier}`;
+                composition.textContent = `Composition: ${subskills.length > 0 ? subskills.join(', ') : 'Atomic (no subskills)'}`;
+
+                // Show subskills
+                subskillsList.innerHTML = '';
+                if (subskills.length > 0) {
+                    subskills.forEach(subskill => {
+                        const div = document.createElement('div');
+                        div.className = 'subskill-item';
+                        div.textContent = subskill;
+                        subskillsList.appendChild(div);
+                    });
+                }
+
+                // Show execution path
+                if (executionPath.length > 0) {
+                    executionPathDiv.style.display = 'block';
+                    executionSteps.innerHTML = '';
+                    executionPath.forEach((step, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'execution-step';
+                        div.textContent = `${index + 1}. ${step}`;
+                        executionSteps.appendChild(div);
+                    });
+                } else {
+                    executionPathDiv.style.display = 'none';
+                }
+
+                document.getElementById('skillDetails').style.display = 'block';
+            }
+
+            getExecutionPath(skillId) {
+                // Simplified execution path calculation
+                const visited = new Set();
+                const path = [];
+
+                const buildPath = (skill) => {
+                    if (visited.has(skill)) return;
+                    visited.add(skill);
+
+                    const subskills = this.data.edges
+                        .filter(edge => edge.source === skill)
+                        .map(edge => edge.target);
+
+                    // Add subskills first (depth-first)
+                    subskills.forEach(subskill => buildPath(subskill));
+
+                    // Add current skill
+                    path.push(skill);
+                };
+
+                buildPath(skillId);
+                return path;
+            }
+
+            nodeMouseover(event, d) {
+                const tooltip = document.getElementById('tooltip');
+                tooltip.innerHTML = `
+                    <strong>${d.label}</strong><br>
+                    Tier: ${d.tier}<br>
+                    Type: ${d.type}
+                `;
+                tooltip.style.display = 'block';
+                tooltip.style.left = (event.pageX + 10) + 'px';
+                tooltip.style.top = (event.pageY - 10) + 'px';
+            }
+
+            nodeMouseout(event, d) {
+                document.getElementById('tooltip').style.display = 'none';
+            }
+
+            highlightNode(d) {
+                // Remove previous selection
+                this.svg.selectAll('.node.selected').classed('selected', false);
+
+                // Highlight selected node
+                this.svg.selectAll('.node')
+                    .filter(node => node.id === d.id)
+                    .classed('selected', true);
+            }
+
+            populateSidebar() {
+                const tiers = ['T0', 'T1', 'T2'];
+                tiers.forEach(tier => {
+                    const container = document.getElementById(`tier${tier.slice(1)}Skills`);
+                    const skills = this.data.nodes.filter(node => node.tier === tier);
+
+                    skills.forEach(skill => {
+                        const div = document.createElement('div');
+                        div.className = `skill-item tier${tier.slice(1)}`;
+                        div.innerHTML = `
+                            <span>${skill.label}</span>
+                            <span class="skill-badge">${tier}</span>
+                        `;
+                        div.addEventListener('click', () => {
+                            this.selectSkillFromSidebar(skill);
+                        });
+                        container.appendChild(div);
+                    });
+                });
+            }
+
+            selectSkillFromSidebar(skill) {
+                this.selectedSkill = skill;
+                this.updateSkillDetails(skill);
+                this.highlightNode(skill);
+
+                // Update sidebar selection
+                document.querySelectorAll('.skill-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                event.currentTarget.classList.add('selected');
+            }
+
+            filterByTier(tier) {
+                if (tier === 'all') {
+                    this.svg.selectAll('.node').style('opacity', 1);
+                    this.svg.selectAll('.link').style('opacity', 0.6);
+                } else {
+                    this.svg.selectAll('.node').style('opacity', d => d.tier === tier ? 1 : 0.3);
+                    this.svg.selectAll('.link').style('opacity', d => {
+                        const sourceTier = this.data.nodes.find(n => n.id === d.source).tier;
+                        const targetTier = this.data.nodes.find(n => n.id === d.target).tier;
+                        return (sourceTier === tier || targetTier === tier) ? 0.6 : 0.1;
+                    });
+                }
+            }
+
+            searchSkills(query) {
+                if (!query) {
+                    document.querySelectorAll('.skill-item').forEach(item => {
+                        item.style.display = 'flex';
+                    });
+                    return;
+                }
+
+                document.querySelectorAll('.skill-item').forEach(item => {
+                    const skillName = item.textContent.toLowerCase();
+                    if (skillName.includes(query.toLowerCase())) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+
+            changeLayout(layoutType) {
+                if (layoutType === 'hierarchical') {
+                    this.simulation
+                        .force('x', d3.forceX(d => {
+                            const tierPositions = {T0: this.width * 0.2, T1: this.width * 0.5, T2: this.width * 0.8};
+                            return tierPositions[d.tier] || this.width / 2;
+                        }))
+                        .force('y', d3.forceY(this.height / 2))
+                        .alpha(1).restart();
+                } else if (layoutType === 'circular') {
+                    this.simulation
+                        .force('x', null)
+                        .force('y', null)
+                        .force('radial', d3.forceRadial(100).strength(0.1))
+                        .alpha(1).restart();
+                } else {
+                    this.simulation
+                        .force('x', null)
+                        .force('y', null)
+                        .force('radial', null)
+                        .alpha(1).restart();
+                }
+            }
+
+            resetView() {
+                this.svg.transition().duration(750).call(
+                    d3.zoom().transform,
+                    d3.zoomIdentity
+                );
+            }
+
+            exportData() {
+                const dataStr = JSON.stringify(this.data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'skill_dag_data.json';
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+
+            refreshData() {
+                document.getElementById('loading').style.display = 'block';
+                this.loadSkillData();
+                this.createVisualization();
+                this.populateSidebar();
+            }
+
+            createWorkflow() {
+                if (this.workflowSkills.size === 0) {
+                    alert('Please select skills to add to the workflow');
+                    return;
+                }
+
+                const workflowSkills = Array.from(this.workflowSkills);
+                console.log('Creating workflow with skills:', workflowSkills);
+
+                // Here you would typically send the workflow to the backend
+                // For now, just show a confirmation
+                alert(`Workflow created with ${workflowSkills.length} skills: ${workflowSkills.join(', ')}`);
+            }
+
+            updateStats() {
+                const stats = document.getElementById('stats');
+                const nodeCount = this.data.nodes.length;
+                const edgeCount = this.data.edges.length;
+                const tierCounts = this.data.nodes.reduce((acc, node) => {
+                    acc[node.tier] = (acc[node.tier] || 0) + 1;
+                    return acc;
+                }, {});
+
+                stats.innerHTML = `
+                    <strong>Statistics</strong><br>
+                    Nodes: ${nodeCount}<br>
+                    Edges: ${edgeCount}<br>
+                    T0: ${tierCounts.T0 || 0}<br>
+                    T1: ${tierCounts.T1 || 0}<br>
+                    T2: ${tierCounts.T2 || 0}
+                `;
+            }
+        }
+
+        // Initialize the visualizer when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new StandaloneSkillDAGVisualizer();
+        });
+    </script>
+</body>
+</html>

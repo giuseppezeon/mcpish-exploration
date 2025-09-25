@@ -35,7 +35,23 @@ def initialize_skills():
 @app.route("/")
 def index():
     """Serve the main DAG visualizer page."""
-    return render_template("dag_visualizer.html")
+    try:
+        # Try to serve the standalone visualizer first (no backend required)
+        if os.path.exists("standalone_dag_visualizer.html"):
+            with open("standalone_dag_visualizer.html", "r") as f:
+                return f.read()
+        # Fallback to enhanced visualizer
+        elif os.path.exists("enhanced_dag_visualizer.html"):
+            with open("enhanced_dag_visualizer.html", "r") as f:
+                return f.read()
+        # Fallback to basic visualizer
+        elif os.path.exists("dag_visualizer.html"):
+            with open("dag_visualizer.html", "r") as f:
+                return f.read()
+        else:
+            return "DAG visualizer HTML file not found", 404
+    except Exception as e:
+        return f"Error loading visualizer: {str(e)}", 500
 
 
 @app.route("/api/skills/dag")
@@ -260,15 +276,6 @@ def health_check():
 if __name__ == "__main__":
     # Initialize skills
     initialize_skills()
-
-    # Create templates directory if it doesn't exist
-    os.makedirs("templates", exist_ok=True)
-
-    # Copy the HTML file to templates directory
-    import shutil
-
-    if os.path.exists("dag_visualizer.html"):
-        shutil.copy("dag_visualizer.html", "templates/dag_visualizer.html")
 
     print("🚀 Starting DAG Visualization Server...")
     print("📊 Available endpoints:")

@@ -179,28 +179,38 @@ def example_workflow():
     # Step 1: Scan workspace
     scan_result = skills.execute_skill("scan_workspace", scan_resolution=1.0)
     print(f"Scan result: {scan_result['success']}")
+    if not scan_result["success"]:
+        print(f"Error: {scan_result['error']}")
 
     # Step 2: Grab tip
     tip_result = skills.execute_skill(
         "grab_tip", pipette_id="pipette_1", tip_type="p200"
     )
     print(f"Grab tip result: {tip_result['success']}")
+    if not tip_result["success"]:
+        print(f"Error: {tip_result['error']}")
 
     # Step 3: Aspirate liquid
     aspirate_result = skills.execute_skill(
         "aspirate", pipette_id="pipette_1", volume=50.0, source_position="A1"
     )
     print(f"Aspirate result: {aspirate_result['success']}")
+    if not aspirate_result["success"]:
+        print(f"Error: {aspirate_result['error']}")
 
     # Step 4: Dispense liquid
     dispense_result = skills.execute_skill(
         "dispense", pipette_id="pipette_1", volume=50.0, target_position="B1"
     )
     print(f"Dispense result: {dispense_result['success']}")
+    if not dispense_result["success"]:
+        print(f"Error: {dispense_result['error']}")
 
     # Step 5: Discard tip
     discard_result = skills.execute_skill("discard_tip", pipette_id="pipette_1")
     print(f"Discard tip result: {discard_result['success']}")
+    if not discard_result["success"]:
+        print(f"Error: {discard_result['error']}")
 
     print("\n✅ Workflow completed successfully!")
 
@@ -219,21 +229,24 @@ def example_machine_workflow():
         "load_machine", machine_id="centrifuge_1", sample_id="sample_001"
     )
     print(f"Load result: {load_result['success']}")
+    if not load_result["success"]:
+        print(f"Error: {load_result['error']}")
 
-    # Start centrifuge cycle
-    cycle_result = skills.execute_skill(
-        "execute_machine_operation",
-        machine_id="centrifuge_1",
-        operation="start_cycle",
-        parameters={"rpm": 3000, "duration": 300},
+    # Operate machine interface
+    interface_result = skills.execute_skill(
+        "operate_machine_interface", machine_id="centrifuge_1", operation="close_door"
     )
-    print(f"Cycle result: {cycle_result['success']}")
+    print(f"Interface result: {interface_result['success']}")
+    if not interface_result["success"]:
+        print(f"Error: {interface_result['error']}")
 
     # Unload sample
     unload_result = skills.execute_skill(
         "unload_machine", machine_id="centrifuge_1", sample_id="sample_001"
     )
     print(f"Unload result: {unload_result['success']}")
+    if not unload_result["success"]:
+        print(f"Error: {unload_result['error']}")
 
     print("\n✅ Machine workflow completed successfully!")
 
