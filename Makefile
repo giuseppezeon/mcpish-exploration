@@ -12,7 +12,7 @@ help:
 	@echo "Targets:"
 	@echo "  venv    - Create a local virtual environment in $(VENV_DIR)"
 	@echo "  install - Create venv (if needed) and install requirements"
-	@echo "  run     - Start the app with uvicorn (after install)"
+	@echo "  run     - Run the simple skills system (after install)"
 	@echo "  clean   - Remove venv and Python caches"
 	@echo "  baml    - Initialize and generate BAML client (optional)"
 
@@ -24,7 +24,7 @@ install: venv
 	$(PIP) install -r requirements.txt
 
 run: install
-	$(UVICORN) app.main:app --reload --host 0.0.0.0 --port 8000
+	$(PYTHON) skills_main.py
 
 baml-init:
 	# Try Node-based CLI first, fall back to system CLI if available

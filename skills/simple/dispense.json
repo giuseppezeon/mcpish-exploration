@@ -8,7 +8,7 @@
       "pipette_id": {"type": "string"},
       "volume": {"type": "number", "minimum": 0.1, "maximum": 5000},
       "target_position": {"type": "string"},
-      "dispense_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0},
+      "dispense_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 1.0}
     },
     "required": ["pipette_id", "volume", "target_position"]
   },

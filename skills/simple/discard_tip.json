@@ -8,7 +8,7 @@
       "pipette_id": {"type": "string"},
       "waste_position": {"type": "string"},
       "force": {"type": "number", "minimum": 0.1, "maximum": 5.0, "default": 1.0},
-      "ejection_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0},
+      "ejection_speed": {"type": "number", "minimum": 0.1, "maximum": 10.0, "default": 2.0}
     },
     "required": ["pipette_id"]
   },

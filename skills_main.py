@@ -1,98 +1,66 @@
 """
-Main Skills Module - Unified interface for all robot skills
+Main Skills Module - Unified interface for simple robot skills
 
-This module provides a unified interface to all robot skills across all tiers,
-allowing easy access to T0, T1, and T2 skills with proper composition.
+This module provides a unified interface to simple robot skills (T0 and T1 only),
+using the simplified skill definitions from the skills/simple/ folder.
 """
 
 import json
+import os
 from typing import Any, Dict, List, Optional
-
-# Import all skill modules
-from skills_tier0 import (
-    adjust_gripper,
-    align_objects,
-    emergency_stop,
-    grab_object,
-    move,
-    pose_estimation,
-    vlm_assert,
-)
-from skills_tier1 import (
-    aspirate,
-    discard_tip,
-    dispense,
-    grab_tip,
-    measure_volume,
-    mix,
-    scan_workspace,
-)
-from skills_tier2 import (
-    load_machine,
-    operate_machine_interface,
-    plate_processing,
-    transfer_liquid,
-    unload_machine,
-)
 
 
 class RobotSkills:
     """
-    Unified interface for all robot skills with tier-based organization.
+    Unified interface for simple robot skills (T0 and T1 only).
 
-    This class provides access to all skills while maintaining the hierarchical
-    composition structure defined in the skill compositions.
+    This class loads skill definitions from the skills/simple/ folder and provides
+    access to T0 (atomic) and T1 (reusable patterns) skills only.
     """
 
-    def __init__(self, machine_database_path: str = "machine_database.json"):
-        """Initialize with machine database for T2 skills."""
-        self.machine_database = self._load_machine_database(machine_database_path)
+    def __init__(self, skills_folder: str = "skills/simple"):
+        """Initialize with simple skills from the specified folder."""
+        self.skills_folder = skills_folder
+        self.skill_definitions = self._load_skill_definitions()
 
-        # Tier 0 (Atomic) Skills
-        self.tier0 = {
-            "move": move,
-            "grab_object": grab_object,
-            "align_objects": align_objects,
-            "adjust_gripper": adjust_gripper,
-            "vlm_assert": vlm_assert,
-            "pose_estimation": pose_estimation,
-            "emergency_stop": emergency_stop,
-        }
+        # Organize skills by tier
+        self.tier0 = {}
+        self.tier1 = {}
 
-        # Tier 1 (Reusable Patterns) Skills
-        self.tier1 = {
-            "grab_tip": grab_tip,
-            "discard_tip": discard_tip,
-            "aspirate": aspirate,
-            "dispense": dispense,
-            "mix": mix,
-            "scan_workspace": scan_workspace,
-            "measure_volume": measure_volume,
-        }
+        for skill_name, skill_def in self.skill_definitions.items():
+            tier = skill_def.get("tier", "T0")
+            if tier == "T0":
+                self.tier0[skill_name] = skill_def
+            elif tier == "T1":
+                self.tier1[skill_name] = skill_def
 
-        # Tier 2 (Procedural) Skills
-        self.tier2 = {
-            "load_machine": load_machine,
-            "operate_machine_interface": operate_machine_interface,
-            "unload_machine": unload_machine,
-            "transfer_liquid": transfer_liquid,
-            "plate_processing": plate_processing,
-        }
+        # All skills combined (T0 and T1 only)
+        self.all_skills = {**self.tier0, **self.tier1}
 
-        # All skills combined
-        self.all_skills = {**self.tier0, **self.tier1, **self.tier2}
+    def _load_skill_definitions(self) -> Dict[str, Any]:
+        """Load all skill definitions from the simple skills folder."""
+        skill_definitions = {}
 
-    def _load_machine_database(self, path: str) -> Dict[str, Any]:
-        """Load machine database for T2 skills."""
-        try:
-            with open(path, "r") as f:
-                return json.load(f)
-        except FileNotFoundError:
-            print(f"Warning: Machine database not found at {path}")
-            return {}
+        if not os.path.exists(self.skills_folder):
+            print(f"Warning: Skills folder not found at {self.skills_folder}")
+            return skill_definitions
 
-    def get_skill(self, skill_name: str):
-        """Get a skill function by name."""
+        for filename in os.listdir(self.skills_folder):
+            if filename.endswith(".json"):
+                skill_name = filename[:-5]  # Remove .json extension
+                file_path = os.path.join(self.skills_folder, filename)
+
+                try:
+                    with open(file_path, "r") as f:
+                        skill_def = json.load(f)
+                        skill_definitions[skill_name] = skill_def
+                except (json.JSONDecodeError, IOError) as e:
+                    print(f"Warning: Could not load {filename}: {e}")
+
+        return skill_definitions
+
+    def get_skill(self, skill_name: str) -> Dict[str, Any]:
+        """Get a skill definition by name."""
         if skill_name in self.all_skills:
             return self.all_skills[skill_name]
         else:
@@ -104,15 +72,22 @@ class RobotSkills:
             return self.tier0
         elif tier == "T1":
             return self.tier1
-        elif tier == "T2":
-            return self.tier2
         else:
-            raise ValueError(f"Invalid tier: {tier}. Must be T0, T1, or T2")
+            raise ValueError(f"Invalid tier: {tier}. Must be T0 or T1")
 
     def execute_skill(self, skill_name: str, **kwargs) -> Dict[str, Any]:
-        """Execute a skill with given parameters."""
-        skill_func = self.get_skill(skill_name)
-        return skill_func(**kwargs)
+        """Simulate skill execution with given parameters."""
+        skill_def = self.get_skill(skill_name)
+
+        # Simple simulation - in real implementation, this would call actual robot functions
+        return {
+            "success": True,
+            "skill_name": skill_name,
+            "tier": skill_def.get("tier", "T0"),
+            "execution_time": skill_def.get("timeout_s", 10),
+            "parameters": kwargs,
+            "message": f"Simulated execution of {skill_name}",
+        }
 
     def get_skill_info(self, skill_name: str) -> Dict[str, Any]:
         """Get information about a skill including its tier and composition."""
@@ -121,17 +96,17 @@ class RobotSkills:
             composition = "Atomic - cannot be decomposed"
         elif skill_name in self.tier1:
             tier = "T1"
-            composition = "Composed of T0 skills"
-        elif skill_name in self.tier2:
-            tier = "T2"
-            composition = "Composed of T1 and T0 skills"
+            composition = "Reusable pattern - composed of T0 skills"
         else:
             return {"error": f"Skill '{skill_name}' not found"}
 
+        skill_def = self.get_skill(skill_name)
         return {
             "name": skill_name,
             "tier": tier,
+            "description": skill_def.get("description", ""),
             "composition": composition,
+            "timeout_s": skill_def.get("timeout_s", 10),
             "available": True,
         }
 
@@ -148,8 +123,8 @@ class RobotSkills:
             "total_skills": len(self.all_skills),
             "tier0_count": len(self.tier0),
             "tier1_count": len(self.tier1),
-            "tier2_count": len(self.tier2),
-            "machine_database_loaded": bool(self.machine_database),
+            "skills_folder": self.skills_folder,
+            "skills_loaded": len(self.skill_definitions),
         }
 
 
@@ -170,27 +145,18 @@ def example_workflow():
     # Show available skills
     print(f"Available T0 skills: {skills.list_skills('T0')}")
     print(f"Available T1 skills: {skills.list_skills('T1')}")
-    print(f"Available T2 skills: {skills.list_skills('T2')}")
     print()
 
     # Example: Simple liquid transfer workflow
     print("🔄 Executing liquid transfer workflow...")
 
-    # Step 1: Scan workspace
-    scan_result = skills.execute_skill("scan_workspace", scan_resolution=1.0)
-    print(f"Scan result: {scan_result['success']}")
-    if not scan_result["success"]:
-        print(f"Error: {scan_result['error']}")
-
-    # Step 2: Grab tip
-    tip_result = skills.execute_skill(
-        "grab_tip", pipette_id="pipette_1", tip_type="p200"
-    )
+    # Step 1: Grab tip
+    tip_result = skills.execute_skill("grab_tip", pipette_id="pipette_1", force=1.0)
     print(f"Grab tip result: {tip_result['success']}")
     if not tip_result["success"]:
         print(f"Error: {tip_result['error']}")
 
-    # Step 3: Aspirate liquid
+    # Step 2: Aspirate liquid
     aspirate_result = skills.execute_skill(
         "aspirate", pipette_id="pipette_1", volume=50.0, source_position="A1"
     )
@@ -198,7 +164,7 @@ def example_workflow():
     if not aspirate_result["success"]:
         print(f"Error: {aspirate_result['error']}")
 
-    # Step 4: Dispense liquid
+    # Step 3: Dispense liquid
     dispense_result = skills.execute_skill(
         "dispense", pipette_id="pipette_1", volume=50.0, target_position="B1"
     )
@@ -206,7 +172,7 @@ def example_workflow():
     if not dispense_result["success"]:
         print(f"Error: {dispense_result['error']}")
 
-    # Step 5: Discard tip
+    # Step 4: Discard tip
     discard_result = skills.execute_skill("discard_tip", pipette_id="pipette_1")
     print(f"Discard tip result: {discard_result['success']}")
     if not discard_result["success"]:
@@ -215,46 +181,54 @@ def example_workflow():
     print("\n✅ Workflow completed successfully!")
 
 
-def example_machine_workflow():
-    """Example of machine-based workflow using T2 skills."""
-    print("\n🏭 MACHINE WORKFLOW EXAMPLE")
+def example_manipulation_workflow():
+    """Example of manipulation workflow using T0 and T1 skills."""
+    print("\n🤖 MANIPULATION WORKFLOW EXAMPLE")
     print("=" * 50)
 
     skills = create_skill_executor()
 
-    # Example: Load sample into centrifuge
-    print("🔄 Loading sample into centrifuge...")
+    # Example: Pick and place workflow
+    print("🔄 Executing pick and place workflow...")
 
-    load_result = skills.execute_skill(
-        "load_machine", machine_id="centrifuge_1", sample_id="sample_001"
+    # Step 1: Move to object
+    move_result = skills.execute_skill(
+        "move",
+        rotations={"x": 0, "y": 0, "z": 0},
+        translations={"x": 100, "y": 50, "z": 10},
     )
-    print(f"Load result: {load_result['success']}")
-    if not load_result["success"]:
-        print(f"Error: {load_result['error']}")
+    print(f"Move result: {move_result['success']}")
 
-    # Operate machine interface
-    interface_result = skills.execute_skill(
-        "operate_machine_interface", machine_id="centrifuge_1", operation="close_door"
+    # Step 2: Grab object
+    grab_result = skills.execute_skill(
+        "grab_object",
+        object_id="object_001",
+        grasp_pose={
+            "position": {"x": 100, "y": 50, "z": 10},
+            "orientation": {"x": 0, "y": 0, "z": 0},
+        },
     )
-    print(f"Interface result: {interface_result['success']}")
-    if not interface_result["success"]:
-        print(f"Error: {interface_result['error']}")
+    print(f"Grab result: {grab_result['success']}")
 
-    # Unload sample
-    unload_result = skills.execute_skill(
-        "unload_machine", machine_id="centrifuge_1", sample_id="sample_001"
+    # Step 3: Move to target
+    move_result2 = skills.execute_skill(
+        "move",
+        rotations={"x": 0, "y": 0, "z": 0},
+        translations={"x": 200, "y": 100, "z": 10},
     )
-    print(f"Unload result: {unload_result['success']}")
-    if not unload_result["success"]:
-        print(f"Error: {unload_result['error']}")
+    print(f"Move to target result: {move_result2['success']}")
 
-    print("\n✅ Machine workflow completed successfully!")
+    # Step 4: Release object
+    release_result = skills.execute_skill("release_object", object_id="object_001")
+    print(f"Release result: {release_result['success']}")
+
+    print("\n✅ Manipulation workflow completed successfully!")
 
 
 if __name__ == "__main__":
     # Run examples
     example_workflow()
-    example_machine_workflow()
+    example_manipulation_workflow()
 
     # Show skill statistics
     skills = create_skill_executor()
@@ -263,5 +237,5 @@ if __name__ == "__main__":
     print(f"Total skills: {stats['total_skills']}")
     print(f"T0 skills: {stats['tier0_count']}")
     print(f"T1 skills: {stats['tier1_count']}")
-    print(f"T2 skills: {stats['tier2_count']}")
-    print(f"Machine database loaded: {stats['machine_database_loaded']}")
+    print(f"Skills folder: {stats['skills_folder']}")
+    print(f"Skills loaded: {stats['skills_loaded']}")
